@@ -1,6 +1,7 @@
 import pytest
 
 from fullerenedatapraser.skeleton import fib, main
+import os
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
@@ -23,3 +24,13 @@ def test_main(capsys):
     main(["7"])
     captured = capsys.readouterr()
     assert "The 7-th Fibonacci number is 13" in captured.out
+
+
+def test_cli():
+    res = os.popen("fibonacci 7")
+    assert "The 7-th Fibonacci number is 13" in res.read()
+
+
+def test_main_python():
+    res = os.popen("python -m fullerenedatapraser.skeleton 7")
+    assert "The 7-th Fibonacci number is 13" in res.read()
