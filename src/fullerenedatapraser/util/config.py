@@ -10,7 +10,7 @@ import logging
 
 
 class GlobalVar:
-    log_level = logging.INFO # work for
+    log_level = logging.WARNING
 
 
 def getGlobValue(name):
@@ -18,18 +18,24 @@ def getGlobValue(name):
 
 
 def setGlobValue(name, value):
-    setattr(GlobalVar, name, value)
+    if hasattr(GlobalVar, name):
+        setattr(GlobalVar, name, value)
+    else:
+        logging.warning(f"Global Var {name} is not pre-defined.\n"
+                        "Please besure you know want you are doing.")
+
 
 class SetModuleEnvValue:
-    def __init__(self,name,value):
-        self._GlobalVarName=name
-        self._GlobalVarValue=getGlobValue(name)
-        self._changeValue=value
+    def __init__(self, name, value):
+        self._GlobalVarName = name
+        self._GlobalVarValue = getGlobValue(name)
+        self._changeValue = value
+
     def __enter__(self):
         setGlobValue(self._GlobalVarName, self._changeValue)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._GlobalVarValue is None:
-            delattr(GlobalVar,self._GlobalVarName)
+            delattr(GlobalVar, self._GlobalVarName)
         else:
-            setGlobValue(self._GlobalVarName,self._GlobalVarValue)
+            setGlobValue(self._GlobalVarName, self._GlobalVarValue)

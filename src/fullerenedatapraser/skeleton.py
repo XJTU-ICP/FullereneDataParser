@@ -22,15 +22,22 @@ References:
 
 import argparse
 import logging
+import os
 import sys
+import tempfile
+from multiprocessing import cpu_count, Pool
 
 from fullerenedatapraser import __version__
+from fullerenedatapraser.data.spiral import adj_gener, adj_store
+from fullerenedatapraser.io.recursion import recursion_files
+from fullerenedatapraser.util.logger import Logger
+from tqdm import tqdm
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
 __license__ = "MIT"
 
-_logger = logging.getLogger(__name__)
+logger = Logger(__name__, console_on=True)
 
 
 # ---- Python API ----
@@ -39,27 +46,72 @@ _logger = logging.getLogger(__name__)
 # `from fullerenedatapraser.skeleton import fib`,
 # when using this Python module as a library.
 
+def store_spiral_output(atomfile, circlefile, targetfile):
+    with tempfile.NamedTemporaryFile(prefix=f"{os.path.basename(atomfile)}_", dir=os.path.dirname(targetfile)) as f:
+        logger.debug(f"{atomfile},{circlefile},{targetfile}")
+        gener = adj_gener(atomfile, circlefile)
+        adj_store(targetfile, gener)
 
-def fib(n):
-    """Fibonacci example function
 
-    Args:
-      n (int): integer
+def print_error(value):
+    logger.error(f"Wrong when using process pool: {value}")
 
-    Returns:
-      int: n-th Fibonacci number
-    """
-    assert n > 0
-    a, b = 1, 1
-    for i in range(n - 1):
-        a, b = b, a + b
-    return a
+
+# def fib(n):
+#     """Fibonacci example function
+#
+#     Args:
+#       n (int): integer
+#
+#     Returns:
+#       int: n-th Fibonacci number
+#     """
+#     assert n > 0
+#     a, b = 1, 1
+#     for i in range(n - 1):
+#         a, b = b, a + b
+#     return a
+
+def read_spiral_output(atomdir=None, circledir=None, storedir="output"):
+    logger.debug(f"Starting processing spiral output files. Using atomdir={atomdir} circledir={circledir} storedir={storedir}")
+    if not (atomdir and circledir):
+        raise ValueError("Either `atomdir` or `circledir` must be given.")
+    if atomdir is None:
+        raise NotImplementedError("Without `atomdir` I don't know what I could do.")
+    elif circledir is None:
+        raise NotImplementedError("Without `circle` I don't know what I could do.")
+    else:
+        logger.debug(f"Create process Pool. cpu_count={cpu_count()}")
+        po = Pool(4)
+        for atomfile in recursion_files(atomdir, format=""):
+            pbar = tqdm(total=41)
+            pbar.set_description(' Flow ')
+            update = lambda *args: pbar.update()
+            basename = os.path.basename(atomfile)
+            circlefile = os.path.join(circledir, basename)
+            targetfile = os.path.join(storedir, basename + ".h5")
+            args = [atomfile, circlefile, targetfile]
+            po.apply_async(func=_store_spiral_output, args=(args,), error_callback=print_error, callback=update)
+        po.close()
+        po.join()
 
 
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
+
+def _read_spiral_output(args):
+    args.atomdir = os.path.abspath(args.atomdir)
+    args.circledir = os.path.abspath(args.circledir)
+    args.storedir = os.path.abspath(args.storedir)
+    read_spiral_output(args.atomdir, args.circledir, args.storedir)
+
+
+def _store_spiral_output(args):
+    logger.debug("args")
+    atomfile, circlefile, targetfile = args
+    store_spiral_output(atomfile, circlefile, targetfile)
 
 
 def parse_args(args):
@@ -72,13 +124,14 @@ def parse_args(args):
     Returns:
       :obj:`argparse.Namespace`: command line parameters namespace
     """
-    parser = argparse.ArgumentParser(description="Just a Fibonacci demonstration")
+    parser = argparse.ArgumentParser(prog="FDP",
+                                     description="Praser toolsets for fullerene data.")
     parser.add_argument(
         "--version",
         action="version",
-        version="FullereneDataPraser {ver}".format(ver=__version__),
+        version=f"FullereneDataPraser {__version__}",
     )
-    parser.add_argument(dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
+
     parser.add_argument(
         "-v",
         "--verbose",
@@ -86,6 +139,7 @@ def parse_args(args):
         help="set loglevel to INFO",
         action="store_const",
         const=logging.INFO,
+        default=logging.INFO
     )
     parser.add_argument(
         "-vv",
@@ -95,6 +149,38 @@ def parse_args(args):
         action="store_const",
         const=logging.DEBUG,
     )
+    subparsers = parser.add_subparsers(  # title="sub-command",
+        metavar="subcommand",
+        help="",
+        required=True)
+    # subcommand spiral
+    subsubparser_spiral = subparsers.add_parser("spiral", help='Toolsets for deal with spiral algorithm and output files.')
+
+    subsubparser_io = subparsers.add_parser("spiralIO", help='IO for deal with spiral algorithm and output files.')
+    subsubparser_io.set_defaults(func=_read_spiral_output)
+    subsubparser_io.add_argument(
+        "--atom",
+        help="Directory of atom adjacent matrix.",
+        dest="atomdir",
+        type=str,
+        required=True
+    )
+    subsubparser_io.add_argument(
+        "--circle",
+        help="Directory of circle adjacent matrix.",
+        dest="circledir",
+        type=str,
+        required=True
+    )
+    subsubparser_io.add_argument(
+        "-o",
+        "--storeDir",
+        help="Directory of store spiral data.",
+        dest="storedir",
+        type=str,
+        required=True
+    )
+
     return parser.parse_args(args)
 
 
@@ -104,10 +190,9 @@ def setup_logging(loglevel):
     Args:
       loglevel (int): minimum loglevel for emitting messages
     """
-    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(
-        level=loglevel, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    from fullerenedatapraser.util.config import setGlobValue
+    setGlobValue("log_level", loglevel)
+    logger.setLevel(loglevel)
 
 
 def main(args):
@@ -121,10 +206,8 @@ def main(args):
           (for example  ``["--verbose", "42"]``).
     """
     args = parse_args(args)
-    setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
-    print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
-    _logger.info("Script ends here")
+    logger = setup_logging(args.loglevel)
+    args.func(args)
 
 
 def run():

@@ -7,6 +7,7 @@
 # ====================================== #
 
 import logging
+
 from fullerenedatapraser.util.config import getGlobValue
 
 __all__ = [
@@ -45,7 +46,7 @@ class BaseLogging(logging.Logger):
         super().__init__(name, level)
 
         # format set of log
-        fmt = "[%(asctime)s]-[%(name)s]-[%(levelname)s]-[%(filename)s,line %(lineno)d] : %(message)s"
+        fmt = "PID:%(process)d [%(asctime)s]-[%(name)s]-[%(levelname)s]-[%(filename)s,line %(lineno)d] : %(message)s"
         formatter = logging.Formatter(fmt)
 
         # to file
@@ -114,7 +115,6 @@ def getLogger(level=logging.DEBUG):
         def isEnabledFor(self, level: int) -> bool:
             self.setLevel(level=getGlobValue("log_level"))
             self.level=getGlobValue("log_level")
-            # FIXME: cannot change log level in runtime.
             return super(RunTimeLogger,self).isEnabledFor(level)
 
 

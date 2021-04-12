@@ -11,7 +11,6 @@ import re
 import numpy as np
 import pandas as pd
 from fullerenedatapraser.util.logger import Logger
-from tqdm import tqdm
 
 logger = Logger(__name__, console_on=True)
 
@@ -169,7 +168,7 @@ def adj_store(path, gener, buffer=1000):
         ]
     )
     store_flag = False
-    for count, item in tqdm(enumerate(gener,1)):
+    for count, item in enumerate(gener, 1):
         spiral_num.append(item["spiral_num"])
         symmetry.append(item["symmetry"])
         NMR.append(item["NMR"])
@@ -199,8 +198,8 @@ def adj_store(path, gener, buffer=1000):
                     "circleadj": circleadj
                 }
             )
-            df=df.append(df_one,ignore_index=True)
-            df.to_hdf(path,'spiral')
+            df = df.append(df_one, ignore_index=True)
+            df.to_hdf(path, 'spiral')
             spiral_num = []
             symmetry = []
             NMR = []
@@ -217,7 +216,7 @@ def adj_store(path, gener, buffer=1000):
             "circleadj"
         ],
         data={
-            "spiral_num":np.array(spiral_num),
+            "spiral_num": np.array(spiral_num),
             "symmetry": symmetry,
             "NMR": NMR,
             "pentagon_index": pentagon_index,
@@ -225,32 +224,25 @@ def adj_store(path, gener, buffer=1000):
             "circleadj": circleadj
         }
     )
-    df=df.append(df_one,ignore_index=True)
-    df.to_hdf(path,'spiral')
+    df = df.append(df_one, ignore_index=True)
+    df.to_hdf(path, 'spiral')
     logger.info(f"ADJ infomation has been stored in {path}.")
 
 
-
-if __name__ == '__main__':
-    atomadj = read_atomadj(r"C:\Work\CODE\DATA\bin\ADJ60")
-    circleadj = read_circleadj(r"C:\Work\CODE\DATA\circleADJ\ADJ60")
-
-
-    def gener():
-        for atom in atomadj:
-            circle = next(circleadj)
-            if atom["spiral_num"] == circle["spiral_num"]:
-                pass
-            else:
-                raise ValueError
-            yield {
-                "spiral_num": atom["spiral_num"],
-                "atomadj": atom["adj_matrix"],
-                "symmetry": atom["symmetry"],
-                "pentagon_index": atom["pentagon_index"],
-                "circleadj": circle["adj_matrix"],
-                "NMR": atom["NMR"]
-            }
-
-
-    adj_store("ADJ60", gener())
+def adj_gener(atomfile, circlefile):
+    atomadj = read_atomadj(atomfile)
+    circleadj = read_circleadj(circlefile)
+    for atom in atomadj:
+        circle = next(circleadj)
+        if atom["spiral_num"] == circle["spiral_num"]:
+            pass
+        else:
+            raise ValueError
+        yield {
+            "spiral_num": atom["spiral_num"],
+            "atomadj": atom["adj_matrix"],
+            "symmetry": atom["symmetry"],
+            "pentagon_index": atom["pentagon_index"],
+            "circleadj": circle["adj_matrix"],
+            "NMR": atom["NMR"]
+        }
