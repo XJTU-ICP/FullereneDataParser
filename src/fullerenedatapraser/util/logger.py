@@ -112,8 +112,11 @@ def getLogger(level=logging.DEBUG):
             super(RunTimeLogger, self).__init__(name=name, level=level, **kwargs)
 
         def isEnabledFor(self, level: int) -> bool:
+            self.setLevel(level=getGlobValue("log_level"))
             self.level=getGlobValue("log_level")
-            super(RunTimeLogger,self).isEnabledFor(level)
+            # FIXME: cannot change log level in runtime.
+            return super(RunTimeLogger,self).isEnabledFor(level)
+
 
     return RunTimeLogger
 
