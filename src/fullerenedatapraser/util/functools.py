@@ -12,7 +12,7 @@ import sys
 
 def lazy_property(func):
     if sys.version_info >= (3, 8):
-        return functools.cached_property()
+        return functools.cached_property(func)
     else:
         attr_name = "_lazy_" + func.__name__
 
