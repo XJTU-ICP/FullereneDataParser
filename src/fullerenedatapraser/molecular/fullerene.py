@@ -7,22 +7,30 @@
 # ====================================== #
 
 from ase import Atoms
-from fullerenedatapraser.util.logger import Logger
+from fullerenedatapraser.calculator.ipr import calculate_ipr
 from fullerenedatapraser.util.functools import lazy_property
+from fullerenedatapraser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 
-class FullereneFamily(Atoms):
-    def __init__(self,spiral,nospiralflag=False,**kwargs):
-        self.spiral=self.get_spiral(spiral,nospiralflag)
-        super(Fullerene, self).__init__(**kwargs)
 
-    def get_spiral(self,spiral,nospiralflag):
+class FullereneFamily(Atoms):
+    def __init__(self, spiral, nospiralflag=False, atomADJ=None, circleADJ=None, **kwargs):
+        self.spiral = self.get_spiral(spiral, nospiralflag)
+        self.atomADJ = atomADJ
+        self.circleADJ = circleADJ
+        if "atoms" in kwargs:
+            super(FullereneFamily, self).__init__(symbols=kwargs["atoms"].symbols,
+                                                  positions=kwargs["atoms"].positions,
+                                                  info=kwargs["atoms"].info)
+        self.natoms = len(self.positions)
+
+    def get_spiral(self, spiral, nospiralflag):
         # test spiral
-        assert isinstance(nospiralflag,bool)
+        assert isinstance(nospiralflag, bool)
         if not nospiralflag:
             if spiral is not None:
-                assert isinstance(spiral,int)
+                assert isinstance(spiral, int)
             else:
                 raise ValueError("No Sprial got."
                                  "If the fullerene doesn't have spiral number, please set `nospiralflag=True`")
@@ -34,4 +42,12 @@ class FullereneFamily(Atoms):
 
     @lazy_property
     def IPR(self):
+        return calculate_ipr(self)
 
+    @lazy_property
+    def calculated_atomADJ(self):
+        raise NotImplementedError
+
+    @lazy_property
+    def calculated_circleADJ(self):
+        raise NotImplementedError

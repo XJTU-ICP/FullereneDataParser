@@ -6,11 +6,17 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
+import os
 import re
+import tempfile
+from multiprocessing import cpu_count, Pool
 
 import numpy as np
 import pandas as pd
+from fullerenedatapraser.io.recursion import recursion_files
 from fullerenedatapraser.util.logger import Logger
+from fullerenedatapraser.util.mp import print_error
+from tqdm import tqdm
 
 logger = Logger(__name__, console_on=True)
 
@@ -168,12 +174,17 @@ def adj_store(path, gener, buffer=1000):
         ]
     )
     store_flag = False
+
+    # Set progress bar
+    pbar = tqdm()
+    pbar.set_description(f'{atomfile}')
+
     for count, item in enumerate(gener, 1):
         spiral_num.append(item["spiral_num"])
         symmetry.append(item["symmetry"])
         NMR.append(item["NMR"])
-        atomadj.append(item["atomadj"])
-        circleadj.append(item["circleadj"])
+        atomadj.append(item["atomadj"].copy())
+        circleadj.append(item["circleadj"].copy())
         pentagon_index.append(item["pentagon_index"])
         if count % buffer == 0:
             store_flag = True
@@ -246,3 +257,56 @@ def adj_gener(atomfile, circlefile):
             "circleadj": circle["adj_matrix"],
             "NMR": atom["NMR"]
         }
+
+
+def store_spiral_output(atomfile, circlefile, targetfile):
+    with tempfile.NamedTemporaryFile(prefix=f"{os.path.basename(atomfile)}_", dir=os.path.dirname(targetfile)) as f:
+        logger.debug(f"{atomfile},{circlefile},{targetfile}")
+        gener = adj_gener(atomfile, circlefile)
+        adj_store(targetfile, gener)
+
+
+def _store_spiral_output(args):
+    atomfile, circlefile, targetfile = args
+    store_spiral_output(atomfile, circlefile, targetfile)
+
+
+def read_spiral_output(atomdir=None, circledir=None, storedir="output"):
+    """
+    !! Multiprocess
+    Parameters
+    ----------
+    atomdir
+    circledir
+    storedir
+
+    Returns
+    -------
+
+    """
+    logger.debug(f"Starting processing spiral output files. Using atomdir={atomdir} circledir={circledir} storedir={storedir}")
+    if not (atomdir and circledir):
+        raise ValueError("Either `atomdir` or `circledir` must be given.")
+    if atomdir is None:
+        raise NotImplementedError("Without `atomdir` I don't know what I could do.")
+    elif circledir is None:
+        raise NotImplementedError("Without `circle` I don't know what I could do.")
+    else:
+        logger.debug(f"Create process Pool. cpu_count={cpu_count()}")
+        tqdm.set_lock(RLock())
+        pa = re.compile("\d+")
+        po = Pool(4, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
+        for atomfile in recursion_files(atomdir, format=""):
+            basename = os.path.basename(atomfile)
+            circlefile = os.path.join(circledir, basename)
+            targetfile = os.path.join(storedir, basename + ".h5")
+            args = [atomfile, circlefile, targetfile]
+            po.apply_async(func=_store_spiral_output, args=(args,), error_callback=print_error)
+        po.close()
+        po.join()
+
+
+if __name__ == '__main__':
+    store_spiral_output(atomfile=r"C:\Work\CODE\DATA\bin\ADJ50",
+                        circlefile=r"C:\Work\CODE\DATA\circleADJ\ADJ50",
+                        targetfile=r"C:\Work\CODE\DATA\test\ADJ50.h5")

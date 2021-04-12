@@ -24,14 +24,11 @@ import argparse
 import logging
 import os
 import sys
-import tempfile
-from multiprocessing import cpu_count, Pool
 
 from fullerenedatapraser import __version__
-from fullerenedatapraser.data.spiral import adj_gener, adj_store
-from fullerenedatapraser.io.recursion import recursion_files
+from fullerenedatapraser.calculator.csi import mp_store_csi
+from fullerenedatapraser.data.spiral import read_spiral_output
 from fullerenedatapraser.util.logger import Logger
-from tqdm import tqdm
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
@@ -46,15 +43,6 @@ logger = Logger(__name__, console_on=True)
 # `from fullerenedatapraser.skeleton import fib`,
 # when using this Python module as a library.
 
-def store_spiral_output(atomfile, circlefile, targetfile):
-    with tempfile.NamedTemporaryFile(prefix=f"{os.path.basename(atomfile)}_", dir=os.path.dirname(targetfile)) as f:
-        logger.debug(f"{atomfile},{circlefile},{targetfile}")
-        gener = adj_gener(atomfile, circlefile)
-        adj_store(targetfile, gener)
-
-
-def print_error(value):
-    logger.error(f"Wrong when using process pool: {value}")
 
 
 # def fib(n):
@@ -72,29 +60,6 @@ def print_error(value):
 #         a, b = b, a + b
 #     return a
 
-def read_spiral_output(atomdir=None, circledir=None, storedir="output"):
-    logger.debug(f"Starting processing spiral output files. Using atomdir={atomdir} circledir={circledir} storedir={storedir}")
-    if not (atomdir and circledir):
-        raise ValueError("Either `atomdir` or `circledir` must be given.")
-    if atomdir is None:
-        raise NotImplementedError("Without `atomdir` I don't know what I could do.")
-    elif circledir is None:
-        raise NotImplementedError("Without `circle` I don't know what I could do.")
-    else:
-        logger.debug(f"Create process Pool. cpu_count={cpu_count()}")
-        po = Pool(4)
-        for atomfile in recursion_files(atomdir, format=""):
-            pbar = tqdm(total=41)
-            pbar.set_description(' Flow ')
-            update = lambda *args: pbar.update()
-            basename = os.path.basename(atomfile)
-            circlefile = os.path.join(circledir, basename)
-            targetfile = os.path.join(storedir, basename + ".h5")
-            args = [atomfile, circlefile, targetfile]
-            po.apply_async(func=_store_spiral_output, args=(args,), error_callback=print_error, callback=update)
-        po.close()
-        po.join()
-
 
 # ---- CLI ----
 # The functions defined in this section are wrappers around the main Python
@@ -108,10 +73,12 @@ def _read_spiral_output(args):
     read_spiral_output(args.atomdir, args.circledir, args.storedir)
 
 
-def _store_spiral_output(args):
-    logger.debug("args")
-    atomfile, circlefile, targetfile = args
-    store_spiral_output(atomfile, circlefile, targetfile)
+def _process_stable_index(args):
+    if args.stableindextype == "CSI":
+        args.adjdir = os.path.abspath(args.adjdir)
+        args.xyzdir = os.path.abspath(args.xyzdir)
+        args.storedir = os.path.abspath(args.storedir)
+        mp_store_csi(args.adjdir, args.xyzdir, args.storedir)
 
 
 def parse_args(args):
@@ -180,6 +147,38 @@ def parse_args(args):
         type=str,
         required=True
     )
+    subsubparser_index = subparsers.add_parser("stableindex", help='Toolsets of some stable index.')
+    subsubparser_index.set_defaults(func=_process_stable_index)
+    subsubparser_index.add_argument(
+        "--type",
+        help="Index type",
+        dest="stableindextype",
+        choices=["CSI", ],
+        type=str,
+        required=True
+    )
+    subsubparser_index.add_argument(
+        "--adj",
+        help="Directory of adjacent files.",
+        dest="adjdir",
+        type=str,
+        required=True
+    )
+    subsubparser_index.add_argument(
+        "--xyz",
+        help="Root directory of xyz directories.",
+        dest="xyzdir",
+        type=str,
+        required=True
+    )
+    subsubparser_index.add_argument(
+        "-o",
+        "--storeDir",
+        help="Directory of store index data.",
+        dest="storedir",
+        type=str,
+        required=True
+    )
 
     return parser.parse_args(args)
 
@@ -197,9 +196,6 @@ def setup_logging(loglevel):
 
 def main(args):
     """Wrapper allowing :func:`fib` to be called with string arguments in a CLI fashion
-
-    Instead of returning the value from :func:`fib`, it prints the result to the
-    ``stdout`` in a nicely formated message.
 
     Args:
       args (List[str]): command line parameters as list of strings
@@ -224,9 +220,4 @@ if __name__ == "__main__":
     #    executing it as a script.
     #    https://docs.python.org/3/library/__main__.html
 
-    # After installing your project with pip, users can also run your Python
-    # modules as scripts via the ``-m`` flag, as defined in PEP 338::
-    #
-    #     python -m fullerenedatapraser.skeleton 42
-    #
     run()
