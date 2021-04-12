@@ -12,7 +12,7 @@ __license__ = "MIT"
 @pytest.fixture(scope="function", autouse=True)
 def test_Global_var_constant():
     assert getGlobValue("varfortest") is None
-    assert getGlobValue("log_level") == logging.INFO
+    assert getGlobValue("log_level") == logging.WARNING
 
 
 @pytest.mark.usefixtures("test_Global_var_constant")
@@ -26,10 +26,10 @@ def test_set_Global_Value():
 
 @pytest.mark.usefixtures("test_Global_var_constant")
 def test_set_Module_Env_Value():
-    assert getGlobValue("log_level") is logging.INFO
+    assert getGlobValue("log_level") is logging.WARNING
     with SetModuleEnvValue("log_level", logging.ERROR):
         assert getGlobValue("log_level") == logging.ERROR
-    assert getGlobValue("log_level") is logging.INFO
+    assert getGlobValue("log_level") is logging.WARNING
     assert getGlobValue("varfortest") is None
     with SetModuleEnvValue("varfortest", 1):
         assert getGlobValue("varfortest") == 1

@@ -9,7 +9,7 @@
 import os
 import re
 import tempfile
-from multiprocessing import cpu_count, Pool
+from multiprocessing import cpu_count, Pool,RLock,cpu_count
 
 import numpy as np
 import pandas as pd
@@ -294,7 +294,7 @@ def read_spiral_output(atomdir=None, circledir=None, storedir="output"):
     else:
         logger.debug(f"Create process Pool. cpu_count={cpu_count()}")
         tqdm.set_lock(RLock())
-        pa = re.compile("\d+")
+        pa = re.compile("[0-9]+")
         po = Pool(4, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
         for atomfile in recursion_files(atomdir, format=""):
             basename = os.path.basename(atomfile)

@@ -66,7 +66,7 @@ def store_csi(adj_path, xyz_dir, target_path):
     spiral_num_list = []
     csi_list = []
     energy_list = []
-    pa = re.compile("\d+")
+    pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     for xyz_path in recursion_files(rootpath=xyz_dir, ignore_mode=True):
         pbar.set_description(f'{adj_path}')
@@ -106,7 +106,7 @@ def mp_store_csi(adj_dir, xyz_root_dir, target_dir):
     """
     freeze_support()
     tqdm.set_lock(RLock())
-    pa = re.compile("\d+")
+    pa = re.compile("[0-9]+")
     po = Pool(4, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
     for adj_path in recursion_files(adj_dir, format=""):
         # update = lambda *args: pbar.update()

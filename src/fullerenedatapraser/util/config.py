@@ -23,6 +23,7 @@ def setGlobValue(name, value):
     else:
         logging.warning(f"Global Var {name} is not pre-defined.\n"
                         "Please besure you know want you are doing.")
+        setattr(GlobalVar, name, value)
 
 
 class SetModuleEnvValue:
