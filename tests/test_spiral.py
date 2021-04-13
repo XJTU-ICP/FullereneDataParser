@@ -7,8 +7,7 @@ __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
 __license__ = "MIT"
 
-TEST_PATH = os.path.dirname(__name__)
-
+TEST_PATH = os.path.abspath(os.path.dirname(__name__))
 
 def test_read_spiral_output():
     """spiral output file combination Tests"""
