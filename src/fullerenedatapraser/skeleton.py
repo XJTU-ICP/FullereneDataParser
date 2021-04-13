@@ -25,6 +25,7 @@ import logging
 import os
 import sys
 
+import deprecation
 from fullerenedatapraser import __version__
 from fullerenedatapraser.calculator.csi import mp_store_csi
 from fullerenedatapraser.data.spiral import read_spiral_output
@@ -81,7 +82,7 @@ def _spiral(args):
 def _process_stable_index(args):
     if args.stableindextype == "CSI":
         args.atomdir = os.path.abspath(args.atomdir)
-        args.circledir = os.path.abspath(args.atomdir)
+        args.circledir = os.path.abspath(args.circledir)
         args.xyzdir = os.path.abspath(args.xyzdir)
         args.storedir = os.path.abspath(args.storedir)
         mp_store_csi(args.atomdir, args.circledir, args.xyzdir, args.storedir)
@@ -128,7 +129,7 @@ def parse_args(args):
         required=True)
     # subcommand spiral
     subsubparser_spiral = subparsers.add_parser("spiral", help='Toolsets for deal with spiral algorithm and output files.')
-    subsubparser_io.set_defaults(func=_spiral)
+    subsubparser_spiral.set_defaults(func=_spiral)
 
     subsubparser_io = subparsers.add_parser("spiralIO", help='[Deprecated] IO for deal with spiral algorithm and output files.')
     subsubparser_io.set_defaults(func=_read_spiral_output)
@@ -165,14 +166,14 @@ def parse_args(args):
         type=str,
         required=True
     )
-    subsubparser_io.add_argument(
+    subsubparser_index.add_argument(
         "--atom",
         help="Directory of atom adjacent matrix.",
         dest="atomdir",
         type=str,
         required=True
     )
-    subsubparser_io.add_argument(
+    subsubparser_index.add_argument(
         "--circle",
         help="Directory of circle adjacent matrix.",
         dest="circledir",
