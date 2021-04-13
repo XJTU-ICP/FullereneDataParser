@@ -6,6 +6,8 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
+from typing import Generator
+
 from ase import Atoms
 from fullerenedatapraser.util.logger import Logger
 

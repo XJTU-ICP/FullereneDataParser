@@ -9,7 +9,7 @@
 import os
 import re
 import tempfile
-from multiprocessing import cpu_count, Pool,RLock,cpu_count
+from multiprocessing import Pool, RLock, cpu_count
 from typing import Generator
 
 import numpy as np
@@ -324,9 +324,3 @@ def read_spiral_output(atomdir=None, circledir=None, storedir="output"):
             po.apply_async(func=_store_spiral_output, args=(args,), error_callback=print_error)
         po.close()
         po.join()
-
-
-if __name__ == '__main__':
-    store_spiral_output(atomfile=r"C:\Work\CODE\DATA\bin\ADJ50",
-                        circlefile=r"C:\Work\CODE\DATA\circleADJ\ADJ50",
-                        targetfile=r"C:\Work\CODE\DATA\test\ADJ50.h5")

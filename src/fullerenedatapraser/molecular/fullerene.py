@@ -7,7 +7,6 @@
 # ====================================== #
 
 from ase import Atoms
-# from fullerenedatapraser.calculator.ipr import calculate_ipr
 from fullerenedatapraser.util.functools import lazy_property
 from fullerenedatapraser.util.logger import Logger
 
@@ -42,7 +41,7 @@ class FullereneFamily(Atoms):
 
     @lazy_property
     def IPR(self):
-        return calculate_ipr(self)
+        raise NotImplementedError
 
     @lazy_property
     def calculated_atomADJ(self):
