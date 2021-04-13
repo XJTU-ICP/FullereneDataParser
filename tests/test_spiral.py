@@ -13,5 +13,5 @@ TEST_PATH = os.path.dirname(__file__)
 
 def test_read_spiral_output():
     """spiral output file combination Tests"""
-    with tempfile.TemporaryDirectory(prefix=r"testspiral_", dir=os.path.join(TEST_PATH, Path(r"files\ADJ"))) as f:
-        read_spiral_output(atomdir=os.path.join(TEST_PATH, Path(r"files\ADJ\atomadj")), circledir=os.path.join(TEST_PATH, Path(r"files\ADJ\circleadj")), storedir=Path(f))
+    with tempfile.TemporaryDirectory(prefix=r"testspiral_", dir=os.path.join(TEST_PATH, Path(r"files/ADJ"))) as f:
+        read_spiral_output(atomdir=os.path.join(TEST_PATH, Path(r"files\ADJ/atomadj")), circledir=os.path.join(TEST_PATH, Path(r"files/ADJ/circleadj")), storedir=Path(f))
