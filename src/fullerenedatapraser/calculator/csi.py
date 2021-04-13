@@ -78,7 +78,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path):
         spiral_num = int(pa.findall(os.path.splitext(xyz_path)[0])[-1])
         assert spiral_num == adj["spiral_num"]
         atomadj = adj["atomadj"]
-        circleadj=adj["circleadj"]
+        circleadj = adj["circleadj"]
         energy = f.info["energy"]
         fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
         spiral_num_list.append(spiral_num)
@@ -126,9 +126,3 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
     po.close()
     po.join()
 
-
-if __name__ == '__main__':
-    mp_store_csi(r"D:\CODE\#DATASETS\FullDB\atomadj",
-                 r"D:\CODE\#DATASETS\FullDB\circleadj",
-                 r"D:\CODE\#DATASETS\FullDB\xTBcal",
-                 r"D:\CODE\#DATASETS\FullDB\CSI")
