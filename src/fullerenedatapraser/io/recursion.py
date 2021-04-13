@@ -7,8 +7,10 @@
 # ====================================== #
 
 import os
-from fullerenedatapraser.util.logger import Logger
+from pathlib import Path
+
 from fullerenedatapraser.io import FileNotMatchError
+from fullerenedatapraser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 
@@ -31,17 +33,17 @@ def recursion_files(rootpath, format="xyz", ignore_mode=False):
     -------
     Generator of file path.
     """
-    root_list = os.listdir(rootpath)
+    root_list = os.listdir(Path(rootpath))
     for item in root_list:
-        item_path = os.path.join(rootpath, item)
+        item_path = Path(os.path.join(rootpath, item))
         if os.path.isdir(item_path):
             for sub_item_path in list(recursion_files(item_path, format, ignore_mode)):
                 if os.path.isfile(sub_item_path):
-                    yield sub_item_path
+                    yield Path(sub_item_path)
         elif os.path.isfile(item_path):
             if format:
                 if f".{format}" in os.path.splitext(item)[-1]:
-                    yield item_path
+                    yield Path(item_path)
                 else:
                     if not ignore_mode:
                         raise FileNotMatchError(
@@ -55,4 +57,4 @@ def recursion_files(rootpath, format="xyz", ignore_mode=False):
                             f"All file doesn't match the format {format} will be ignored."
                         )
             else:
-                yield item_path
+                yield Path(item_path)

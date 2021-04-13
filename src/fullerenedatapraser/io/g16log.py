@@ -83,7 +83,6 @@ class LogFile(object):
             information = file.read()
             # self.content['taskTitle'] = LogFile.par_tasktitle.findall(information)[0]
             self.content['taskTitle'] = os.path.basename(self.path)
-            print(LogFile.par_taskmethod.findall(information))
             self.content['taskMethod'] = LogFile.par_taskmethod.findall(information)[0]
             try:
                 self.content['CPUTime'] = [float(i) for i in LogFile.par_cputime.findall(information)[0]]
