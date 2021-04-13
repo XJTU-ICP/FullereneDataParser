@@ -10,7 +10,7 @@ __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
 __license__ = "MIT"
 
-TEST_PATH = os.path.abspath(os.path.dirname(__name__))
+TEST_PATH = os.path.abspath(__name__)
 
 with SetModuleEnvValue("log_level", logging.WARNING):
     def test_recursion_with_format():
