@@ -10,6 +10,7 @@ import os
 import re
 import tempfile
 from multiprocessing import cpu_count, Pool,RLock,cpu_count
+from typing import Generator
 
 import numpy as np
 import pandas as pd
@@ -177,7 +178,7 @@ def adj_store(path, gener, buffer=1000):
 
     # Set progress bar
     pbar = tqdm()
-    pbar.set_description(f'{atomfile}')
+    pbar.set_description(f'{path}')
 
     for count, item in enumerate(gener, 1):
         spiral_num.append(item["spiral_num"])
@@ -240,7 +241,26 @@ def adj_store(path, gener, buffer=1000):
     logger.info(f"ADJ infomation has been stored in {path}.")
 
 
-def adj_gener(atomfile, circlefile):
+def adj_gener(atomfile, circlefile)->Generator[dict,None,None]:
+    """
+
+    Parameters
+    ----------
+    atomfile
+    circlefile
+
+    Returns
+    -------
+    Generator[dict]:
+        {
+            "spiral_num": atom["spiral_num"],
+            "atomadj": atom["adj_matrix"],
+            "symmetry": atom["symmetry"],
+            "pentagon_index": atom["pentagon_index"],
+            "circleadj": circle["adj_matrix"],
+            "NMR": atom["NMR"]
+        }
+    """
     atomadj = read_atomadj(atomfile)
     circleadj = read_circleadj(circlefile)
     for atom in atomadj:

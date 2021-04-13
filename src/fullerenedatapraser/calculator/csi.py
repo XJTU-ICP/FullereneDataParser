@@ -17,6 +17,7 @@ from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
 from fullerenedatapraser.molecular.fullerene import FullereneFamily
 from fullerenedatapraser.util.logger import Logger
 from fullerenedatapraser.util.mp import print_error
+from fullerenedatapraser.data.spiral import adj_gener
 from tqdm import tqdm
 
 logger = Logger(__name__, console_on=True)
@@ -44,15 +45,15 @@ def calculate_csi(fullerene: FullereneFamily):
     return chi[0], chi[1]
 
 
-def store_csi(adj_path, xyz_dir, target_path):
+def store_csi(adjgener, xyz_dir, target_path):
     """
     save file to `target_path`,{
     csi_list,spiral_num,energy
     }
     Parameters
     ----------
-    adj_path:
-        ADJfile path by using `data.spiral.adj_store`
+    adjgener: Generator
+         from `data.spiral.adjgener`
     xyz_dir:
         .xyz files directory
     target_path
@@ -69,14 +70,15 @@ def store_csi(adj_path, xyz_dir, target_path):
     pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     for xyz_path in recursion_files(rootpath=xyz_dir, ignore_mode=True):
-        pbar.set_description(f'{adj_path}')
+        adj = next(adjgener)
+        pbar.set_description(f'{xyz_path}')
         pbar.update()
         f = list(simple_read_xyz_xtb(xyz_path))[-1]
 
         spiral_num = int(pa.findall(os.path.splitext(xyz_path)[0])[-1])
-        ADJ = pd.read_hdf(adj_path)
-        atomadj = np.array(ADJ[ADJ["spiral_num"] == spiral_num]["atomadj"])[0]
-        circleadj = np.array(ADJ[ADJ["spiral_num"] == spiral_num]["circleadj"])[0]
+        assert spiral_num == adj["spiral_num"]
+        atomadj = adj["atomadj"]
+        circleadj=adj["circleadj"]
         energy = f.info["energy"]
         fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
         spiral_num_list.append(spiral_num)
@@ -87,11 +89,11 @@ def store_csi(adj_path, xyz_dir, target_path):
 
 def _store_csi(args):
     logger.debug(f"_store_csi:{args}")
-    atomfile, circlefile, targetfile = args
-    store_csi(atomfile, circlefile, targetfile)
+    adjgener, circlefile, targetfile = args
+    store_csi(adjgener, circlefile, targetfile)
 
 
-def mp_store_csi(adj_dir, xyz_root_dir, target_dir):
+def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
     """
     Batch process of calculating CSI
     Parameters
@@ -108,19 +110,20 @@ def mp_store_csi(adj_dir, xyz_root_dir, target_dir):
     tqdm.set_lock(RLock())
     pa = re.compile("[0-9]+")
     po = Pool(4, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
-    for adj_path in recursion_files(adj_dir, format=""):
+    for atomfile in recursion_files(atomdir, format=""):
+        basename = os.path.basename(atomfile)
+        circlefile = os.path.join(circledir, basename)
+
+        adjgener=adj_gener(atomfile,circlefile)
+
         # update = lambda *args: pbar.update()
-        basename = "C" + pa.findall(os.path.splitext(adj_path)[0])[-1]
+        basename = "C" + pa.findall(os.path.splitext(atomfile)[0])[-1]
         xyz_dir = os.path.join(xyz_root_dir, basename)
         try:
             target_path = os.path.join(target_dir, basename + "_CSI.npz")
-            args = adj_path, xyz_dir, target_path
+            args = adjgener, xyz_dir, target_path
             po.apply_async(func=_store_csi, args=(args,), error_callback=print_error)
         except FileNotFoundError:
             continue
     po.close()
     po.join()
-
-
-if __name__ == '__main__':
-    store_csi(adj_path=r"C:\Work\CODE\DATA\test\ADJ50.h5", xyz_dir=r"C:\Work\CODE\DATA\fullerxTBcal\xTBcal\C50", target_path=r"C:\Work\CODE\DATA\CSI\C50_CSI.npz")

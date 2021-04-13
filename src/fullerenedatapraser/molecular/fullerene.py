@@ -7,7 +7,7 @@
 # ====================================== #
 
 from ase import Atoms
-from fullerenedatapraser.calculator.ipr import calculate_ipr
+# from fullerenedatapraser.calculator.ipr import calculate_ipr
 from fullerenedatapraser.util.functools import lazy_property
 from fullerenedatapraser.util.logger import Logger
 
