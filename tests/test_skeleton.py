@@ -3,7 +3,7 @@ import os
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
 __license__ = "MIT"
-TEST_PATH = os.path.abspath(__name__)
+TEST_PATH = os.path.dirname(__file__)
 # def test_fib():
 #     """API Tests"""
 #     assert fib(1) == 1

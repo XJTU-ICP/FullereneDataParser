@@ -9,7 +9,7 @@ __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
 __license__ = "MIT"
 
-TEST_PATH = os.path.abspath(__name__)
+TEST_PATH = os.path.dirname(__file__)
 
 def test_read_xyz():
     """xyz read one Tests"""
