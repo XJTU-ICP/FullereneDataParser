@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import pytest
 from fullerenedatapraser.io import FileNotMatchError
@@ -16,17 +17,17 @@ with SetModuleEnvValue("log_level", logging.WARNING):
         """Recursion file Tests, using format constrain"""
         filelist = list(recursion_files(os.path.join(TEST_PATH, "files"), format="xyz", ignore_mode=True))
         # assert r"files\subdirectory\dummy" in filelist
-        assert os.path.join(TEST_PATH, r"files\subdirectory\C28_000000001opt.xyz") in filelist
-        assert os.path.join(TEST_PATH, r"files\C28_000000001opt.xyz") in filelist
-        assert os.path.join(TEST_PATH, r"files\C28_000000001opted.xyz") in filelist
+        assert Path(os.path.join(TEST_PATH, "files/subdirectory/C28_000000001opt.xyz")) in filelist
+        assert Path(os.path.join(TEST_PATH, "files/C28_000000001opt.xyz")) in filelist
+        assert Path(os.path.join(TEST_PATH, "files/C28_000000001opted.xyz")) in filelist
 
     def test_recursion_without_format():
         """Recursion file Tests, without format constrain"""
         filelist = list(recursion_files(os.path.join(TEST_PATH, "files"), format=None))
-        assert os.path.join(TEST_PATH, r"files\subdirectory\dummy") in filelist
-        assert os.path.join(TEST_PATH, r"files\subdirectory\C28_000000001opt.xyz") in filelist
-        assert os.path.join(TEST_PATH, r"files\C28_000000001opt.xyz") in filelist
-        assert os.path.join(TEST_PATH, r"files\C28_000000001opted.xyz") in filelist
+        assert Path(os.path.join(TEST_PATH, "files/subdirectory/dummy")) in filelist
+        assert Path(os.path.join(TEST_PATH, "files/subdirectory/C28_000000001opt.xyz")) in filelist
+        assert Path(os.path.join(TEST_PATH, "files/C28_000000001opt.xyz")) in filelist
+        assert Path(os.path.join(TEST_PATH, "files/C28_000000001opted.xyz")) in filelist
 
     def test_recursion_exception_with_format():
         """Recursion file Tests, with format constrain and hope A FileNotMatchError could be raised."""
