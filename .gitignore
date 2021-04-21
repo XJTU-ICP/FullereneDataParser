@@ -20,6 +20,7 @@ __pycache__/*
 .pydevproject
 .settings
 .idea
+.idea/*
 .vscode
 tags
 
@@ -45,6 +46,7 @@ sdist/*
 docs/api/*
 docs/_rst/*
 docs/_build/*
+docs/builddir/*
 cover/*
 MANIFEST
 
