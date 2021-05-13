@@ -109,7 +109,7 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
     freeze_support()
     tqdm.set_lock(RLock())
     pa = re.compile("[0-9]+")
-    po = Pool(4, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
+    po = Pool(1, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),))
     for atomfile in recursion_files(atomdir, format=""):
         basename = os.path.basename(atomfile)
         circlefile = os.path.join(circledir, basename)

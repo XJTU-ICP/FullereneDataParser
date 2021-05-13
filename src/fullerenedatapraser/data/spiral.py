@@ -46,9 +46,9 @@ class SpiralFile:
             self.atom_num = atom_num
         else:
             try:
-                self.atom_num = int(SpiralFile.regex_int_name.findall(path)[-1])
+                self.atom_num = int(SpiralFile.regex_int_name.findall(str(path))[-1])
             except AttributeError:
-                logger.warning("Not a typical path of spiral file. I'll try reading from the file.")
+                logger.warning("Not a typical path of spiral file. I'll try reading atom from the file.")
                 self.read_atom_from_file = True
             except Exception:
                 raise Exception
@@ -268,7 +268,7 @@ def adj_gener(atomfile, circlefile)->Generator[dict,None,None]:
         if atom["spiral_num"] == circle["spiral_num"]:
             pass
         else:
-            raise ValueError
+            raise ValueError(f"Spiral_num not equal. In atom:{atom['spiral_num']}, In circle: {circle['spiral_num']}")
         yield {
             "spiral_num": atom["spiral_num"],
             "atomadj": atom["adj_matrix"],
