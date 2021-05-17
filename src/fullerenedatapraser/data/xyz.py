@@ -14,7 +14,7 @@ from fullerenedatapraser.util.logger import Logger
 logger = Logger(__name__, console_on=True)
 
 
-def simple_read_xyz_xtb(fileobj, index: None or slice = None, read_comment: bool = True) -> Generator[Atoms]:
+def simple_read_xyz_xtb(fileobj, index: None or slice = None, read_comment: bool = True) -> Generator[ase.Atoms]:
     """
 
     Parameters

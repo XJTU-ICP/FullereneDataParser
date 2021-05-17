@@ -70,7 +70,7 @@ logger = Logger(__name__, console_on=True)
 @deprecation.deprecated(deprecated_in="0.0.1a1", removed_in="0.0.2",current_version=__version__,
                         details="Please don't use data from more than C80. You can directly use stableindex functions.")
 def _read_spiral_output(args):
-    logger.warning("Batch process of calculating CSI May found memory issues.")
+    logger.warning("Batch process of calculating CSI May cause memory issues.")
     args.atomdir = os.path.abspath(args.atomdir)
     args.circledir = os.path.abspath(args.circledir)
     args.storedir = os.path.abspath(args.storedir)
