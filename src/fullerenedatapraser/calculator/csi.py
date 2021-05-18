@@ -60,7 +60,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path):
 
     See Also
     --------
-    data.spiral.adj_store
+    data.spiral.adj_store, calculate_csi
 
     """
     spiral_num_list = []
@@ -96,14 +96,10 @@ def _store_csi(args):
 def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
     """
     Batch process of calculating CSI
-    Parameters
-    ----------
-    adj_path
-    xyz_dir
-    target_path
 
-    Returns
-    -------
+    See Also
+    --------
+    `store_csi`, `calculate_csi`
 
     """
     freeze_support()
@@ -117,6 +113,8 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
         # update = lambda *args: pbar.update()
         basename = "C" + pa.findall(os.path.splitext(atomfile)[0])[-1]
         xyz_dir = os.path.join(xyz_root_dir, basename)
+        if not os.path.exists(target_dir):
+            os.mkdir(target_dir)
         try:
             target_path = os.path.join(target_dir, basename + "_CSI.npz")
             args = atomfile, circlefile, xyz_dir, target_path

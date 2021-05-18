@@ -20,15 +20,22 @@ References:
     - https://pip.pypa.io/en/stable/reference/pip_install
 """
 
-import argparse
 import logging
 import os
 import sys
 
-import deprecation
-from fullerenedatapraser import __version__
+import click
+
+try:
+    import deprecation
+except ModuleNotFoundError:
+    class deprecation:
+        @classmethod
+        def deprecated(*args, **kwargs):
+            logger.warning("Please install module `deprecation` by `conda install deprecation -c conda-forge.`")
+            sys.exit(1)
+
 from fullerenedatapraser.calculator.csi import mp_store_csi
-from fullerenedatapraser.data.spiral import read_spiral_output
 from fullerenedatapraser.util.logger import Logger
 
 __author__ = "hanyanbo"
@@ -67,167 +74,55 @@ logger = Logger(__name__, console_on=True)
 # API allowing them to be called directly from the terminal as a CLI
 # executable/script.
 
-@deprecation.deprecated(deprecated_in="0.0.1a1", removed_in="0.0.2",current_version=__version__,
-                        details="Please don't use data from more than C80. You can directly use stableindex functions.")
-def _read_spiral_output(args):
-    logger.warning("Batch process of calculating CSI May cause memory issues.")
-    args.atomdir = os.path.abspath(args.atomdir)
-    args.circledir = os.path.abspath(args.circledir)
-    args.storedir = os.path.abspath(args.storedir)
-    read_spiral_output(args.atomdir, args.circledir, args.storedir)
-
-def _spiral(args):
-    raise NotImplementedError("`Spiral` integration is in Working.")
-
-def _process_stable_index(args):
-    if args.stableindextype == "CSI":
-        args.atomdir = os.path.abspath(args.atomdir)
-        args.circledir = os.path.abspath(args.circledir)
-        args.xyzdir = os.path.abspath(args.xyzdir)
-        args.storedir = os.path.abspath(args.storedir)
-        mp_store_csi(args.atomdir, args.circledir, args.xyzdir, args.storedir)
-
-
-def parse_args(args):
-    """Parse command line parameters
-
-    Args:
-      args (List[str]): command line parameters as list of strings
-          (for example  ``["--help"]``).
-
-    Returns:
-      :obj:`argparse.Namespace`: command line parameters namespace
+@click.group()
+@click.version_option()
+@click.option('-v', '--verbose', count=True)
+def fullertool(verbose):
     """
-    parser = argparse.ArgumentParser(prog="fullertool",
-                                     description="Praser toolsets for fullerene data.")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"FullereneDataPraser {__version__}",
-    )
-
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        dest="loglevel",
-        help="set loglevel to INFO",
-        action="store_const",
-        const=logging.INFO,
-        default=logging.INFO
-    )
-    parser.add_argument(
-        "-vv",
-        "--very-verbose",
-        dest="loglevel",
-        help="set loglevel to DEBUG",
-        action="store_const",
-        const=logging.DEBUG,
-    )
-    subparsers = parser.add_subparsers(  # title="sub-command",
-        metavar="subcommand",
-        help="",
-        required=True)
-    # subcommand spiral
-    subsubparser_spiral = subparsers.add_parser("spiral", help='Toolsets for deal with spiral algorithm and output files.')
-    subsubparser_spiral.set_defaults(func=_spiral)
-
-    subsubparser_io = subparsers.add_parser("spiralIO", help='[Deprecated] IO for deal with spiral algorithm and output files.')
-    subsubparser_io.set_defaults(func=_read_spiral_output)
-    subsubparser_io.add_argument(
-        "--atom",
-        help="Directory of atom adjacent matrix.",
-        dest="atomdir",
-        type=str,
-        required=True
-    )
-    subsubparser_io.add_argument(
-        "--circle",
-        help="Directory of circle adjacent matrix.",
-        dest="circledir",
-        type=str,
-        required=True
-    )
-    subsubparser_io.add_argument(
-        "-o",
-        "--storeDir",
-        help="Directory of store spiral data.",
-        dest="storedir",
-        type=str,
-        required=True
-    )
-
-    subsubparser_index = subparsers.add_parser("stableindex", help='Toolsets of some stable index.')
-    subsubparser_index.set_defaults(func=_process_stable_index)
-    subsubparser_index.add_argument(
-        "--type",
-        help="Index type",
-        dest="stableindextype",
-        choices=["CSI", ],
-        type=str,
-        required=True
-    )
-    subsubparser_index.add_argument(
-        "--atom",
-        help="Directory of atom adjacent matrix.",
-        dest="atomdir",
-        type=str,
-        required=True
-    )
-    subsubparser_index.add_argument(
-        "--circle",
-        help="Directory of circle adjacent matrix.",
-        dest="circledir",
-        type=str,
-        required=True
-    )
-    subsubparser_index.add_argument(
-        "--xyz",
-        help="Root directory of xyz directories.",
-        dest="xyzdir",
-        type=str,
-        required=True
-    )
-    subsubparser_index.add_argument(
-        "-o",
-        "--storeDir",
-        help="Directory of store index data.",
-        dest="storedir",
-        type=str,
-        required=True
-    )
-
-    return parser.parse_args(args)
-
-
-def setup_logging(loglevel):
-    """Setup basic logging
-
-    Args:
-      loglevel (int): minimum loglevel for emitting messages
+    Praser toolsets for fullerene data.
+    By MIT License.(2021-)\n
+    Use `-v` and `-vv` to set log level.
     """
     from fullerenedatapraser.util.config import setGlobValue
-    setGlobValue("log_level", loglevel)
-    logger.setLevel(loglevel)
+    if 2 > verbose > 0:
+        setGlobValue("log_level", logging.INFO)
+        logger.setLevel(logging.INFO)
+    if verbose > 1:
+        setGlobValue("log_level", logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+    del setGlobValue
+    pass
 
 
-def main(args):
-    """Wrapper allowing :func:`fib` to be called with string arguments in a CLI fashion
-
-    Args:
-      args (List[str]): command line parameters as list of strings
-          (for example  ``["--verbose", "42"]``).
+@fullertool.command()
+def spiral():
     """
-    args = parse_args(args)
-    logger = setup_logging(args.loglevel)
-    args.func(args)
-
-
-def run():
-    """Calls :func:`main` passing the CLI arguments extracted from :obj:`sys.argv`
-
-    This function can be used as entry point to create console scripts with setuptools.
+    Toolsets for deal with spiral algorithm and output files. (TODO)
     """
-    main(sys.argv[1:])
+    # TODO: Spiral binary.
+    click.echo(click.style("`Spiral` integration is Unavailable now.", fg="red"), err=True)
+    # raise NotImplementedError("`Spiral` integration is in Working.")
+
+
+@fullertool.command()
+@click.option("--type", "-t", "stableindextype", help="Index type of stability.", type=click.Choice(["CSI", ]))
+@click.option("--atom", "--at", "atomdir", help="Directory of atom adjacent matrix.", prompt="Directory of atom adjacent matrix")
+@click.option("--circle", "--ci", "circledir", help="Directory of circle adjacent matrix.", prompt="Directory of circle adjacent matrix")
+@click.option("--xyzdir", "--xyz", "xyzdir", help="ROOT directory of xyz directories.", prompt="ROOT directory of xyz directories")
+@click.option("--stor", "-o", "storedir", help="Directory to store index data.", prompt="Directory to store index data")
+def stableindex(stableindextype, atomdir, circledir, xyzdir, storedir):
+    """
+    Toolsets of some stable index. \
+    You will get `.npz` files in `storedir` directory.\n
+    In `.npz` files, there will be there subdata named:\n
+     'csi_list', 'spiral_num' and 'energy'.
+    """
+    if stableindextype == "CSI":
+        atomdir = os.path.abspath(atomdir)
+        circledir = os.path.abspath(circledir)
+        xyzdir = os.path.abspath(xyzdir)
+        storedir = os.path.abspath(storedir)
+        mp_store_csi(atomdir, circledir, xyzdir, storedir)
 
 
 if __name__ == "__main__":
@@ -236,4 +131,4 @@ if __name__ == "__main__":
     #    executing it as a script.
     #    https://docs.python.org/3/library/__main__.html
 
-    run()
+    fullertool()
