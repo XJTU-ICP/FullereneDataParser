@@ -10,7 +10,7 @@ from ase.atoms import Atoms
 from fullerenedatapraser.io import FileCommentError
 from fullerenedatapraser.util.logger import Logger
 
-logger = Logger(__name__,console_on=True)
+logger = Logger(__name__, console_on=True)
 
 
 def simple_read_xyz_xtb(filepath, index=None, read_comment=True):
@@ -41,7 +41,7 @@ def simple_read_xyz_xtb(filepath, index=None, read_comment=True):
                 try:
                     comments = dict(energy=float(lines[n - 1].split()[1]))
                 except IndexError:
-                    if not len(lines[n - 1].split()): # if there is no comment
+                    if not len(lines[n - 1].split()):  # if there is no comment
                         raise FileCommentError(f"Comments not recognizable: {lines[n - 1]}.\n Try to set `read_comment=False`.")
                     else:
                         comments = {}
