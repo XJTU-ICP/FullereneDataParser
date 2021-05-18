@@ -52,7 +52,6 @@ logger = Logger(__name__, console_on=True)
 # when using this Python module as a library.
 
 
-
 # def fib(n):
 #     """Fibonacci example function
 #
