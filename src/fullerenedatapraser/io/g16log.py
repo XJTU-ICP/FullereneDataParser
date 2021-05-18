@@ -6,15 +6,15 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
+import os
+import re
+
 import numpy as np
 from ase.atoms import Atoms
 from fullerenedatapraser.util.functools import lazy_property
 from fullerenedatapraser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
-
-import re
-import os
 
 
 class LogFile(object):

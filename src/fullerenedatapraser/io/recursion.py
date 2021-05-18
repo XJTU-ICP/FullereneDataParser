@@ -48,7 +48,7 @@ def recursion_files(rootpath, format="xyz", ignore_mode=False):
                     if not ignore_mode:
                         raise FileNotMatchError(
                             f"There is at least one file not '.{format}' file, "
-                             "Please make sure your data is clean."
+                            "Please make sure your data is clean."
                             f"The file is at {item_path}"
                         )
                     else:

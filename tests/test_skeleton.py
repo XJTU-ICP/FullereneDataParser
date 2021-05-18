@@ -25,6 +25,8 @@ TEST_PATH = os.path.dirname(__file__)
 # def test_cli():
 #     res = os.popen("fibonacci 7")
 #     assert "The 7-th Fibonacci number is 13" in res.read()
+
+
 def test_cli():
     if not os.path.exists(os.path.join(TEST_PATH, r"files/ADJ/test")):
         os.mkdir(os.path.join(TEST_PATH, r"files/ADJ/test"))

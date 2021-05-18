@@ -24,7 +24,7 @@ class FullereneFamily(Atoms):
                                                   info=kwargs["atoms"].info)
         self.natoms = len(self.positions)
 
-    def get_spiral(self, spiral, nospiralflag):
+    def get_spiral(self, spiral, nospiralflag=False):
         # test spiral
         assert isinstance(nospiralflag, bool)
         if not nospiralflag:

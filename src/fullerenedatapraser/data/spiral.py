@@ -241,7 +241,7 @@ def adj_store(path, gener, buffer=1000):
     logger.info(f"ADJ infomation has been stored in {path}.")
 
 
-def adj_gener(atomfile, circlefile)->Generator[dict,None,None]:
+def adj_gener(atomfile, circlefile) -> Generator[dict, None, None]:
     """
 
     Parameters

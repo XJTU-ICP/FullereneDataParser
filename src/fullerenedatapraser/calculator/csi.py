@@ -123,4 +123,3 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
             continue
     po.close()
     po.join()
-

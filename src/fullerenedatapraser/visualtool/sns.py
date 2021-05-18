@@ -88,7 +88,7 @@ class Plotter:
         self.drawer = drawer
 
     def draw(self, x, y, markers="+", xlim=None, ylim=None, figsize=(15, 10)):
-        if type(x[0]) is float or type(x[0]) is int or type(x[0]) is np.float64:
+        if isinstance(x[0], float) or isinstance(x[0], int) or isinstance(x[0], np.float64):
             data = pd.DataFrame({"xi": [xi for xi in x], "yi": [yi for yi in y]})
         else:
             data = pd.DataFrame({"xi": [xi[0] for xi in x], "yi": [yi[0] for yi in y]})

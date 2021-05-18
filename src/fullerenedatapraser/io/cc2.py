@@ -6,10 +6,6 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
-from ase.atoms import Atoms
-from fullerenedatapraser.io import FileCommentError
 from fullerenedatapraser.util.logger import Logger
 
-logger = Logger(__name__,console_on=True)
-
-
+logger = Logger(__name__, console_on=True)

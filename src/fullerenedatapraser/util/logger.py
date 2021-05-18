@@ -20,7 +20,7 @@ Usage:
 ```
 from ..util.logger import InfoLogger
 
-logger = InfoLogger(__name__,...) # all log above Info level will be logged. 
+logger = InfoLogger(__name__,...) # all log above Info level will be logged.
 
 ```
 
@@ -114,9 +114,8 @@ def getLogger(level=logging.DEBUG):
 
         def isEnabledFor(self, level: int) -> bool:
             self.setLevel(level=getGlobValue("log_level"))
-            self.level=getGlobValue("log_level")
-            return super(RunTimeLogger,self).isEnabledFor(level)
-
+            self.level = getGlobValue("log_level")
+            return super(RunTimeLogger, self).isEnabledFor(level)
 
     return RunTimeLogger
 

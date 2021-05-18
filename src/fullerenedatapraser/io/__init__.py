@@ -12,15 +12,17 @@ class MolecularIOError(Exception):
     """
 
 
-class FileNotMatchError(FileNotFoundError,MolecularIOError):
+class FileNotMatchError(FileNotFoundError, MolecularIOError):
     """
     Exception for file not found or match.
     """
+
 
 class FileContentError(Exception):
     """
     Base class for exception in file content illegal.
     """
+
 
 class FileCommentError(FileContentError):
     """
