@@ -8,6 +8,7 @@
 
 from typing import Generator
 
+import ase
 from ase import Atoms
 from fullerenedatapraser.util.logger import Logger
 
