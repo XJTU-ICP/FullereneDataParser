@@ -13,18 +13,20 @@ cimport cython
 DTYPE = int
 ctypedef np.int_t DTYPE_t
 
+
 def dual(np.ndarray[DTYPE_t, ndim=2] D,
          int M,
          int N):
     return c_dual(D, M, N)
+
 
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 cdef  c_dual(np.ndarray[DTYPE_t, ndim=2] D,
              int M,
              int N):
-    cdef np.ndarray[DTYPE_t, ndim = 2] V
-    cdef np.ndarray[DTYPE_t, ndim= 2] A
+    cdef np.ndarray[DTYPE_t, ndim= 2] V
+    cdef np.ndarray[DTYPE_t, ndim = 2] A
     cdef int I = 0
     cdef int L, K, J
     cdef int IER

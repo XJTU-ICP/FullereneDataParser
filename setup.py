@@ -8,9 +8,9 @@
 """
 import os
 
+from setuptools import setup, find_packages
 # from setuptools import Extension
 from Cython.Build import cythonize
-from setuptools import setup, find_packages
 
 
 def find_pyx(path='.'):
