@@ -6,37 +6,26 @@
     PyScaffold helps you to put up the scaffold of your new Python project.
     Learn more under: https://pyscaffold.org/
 """
-import os
 
-from setuptools import setup, find_packages
-# from setuptools import Extension
 from Cython.Build import cythonize
-
-
-def find_pyx(path='.'):
-    pyx_files = []
-    for root, dirs, filenames in os.walk(path):
-        for fname in filenames:
-            if fname.endswith('.pyx'):
-                pyx_files.append(os.path.join(root, fname))
-    return pyx_files
-
+from setuptools import Extension
+from setuptools import setup
 
 if __name__ == "__main__":
     try:
         import numpy
 
-        extensions = [*find_pyx()
-                      # Extension("fullerenedatapraser.graph.dual", ["src/fullerenedatapraser/graph/dual/*.pyx"],
-                      # include_dirs=[numpy.get_include()],
-                      # libraries=[],c
+        extensions = [  # *find_pyx()
+            Extension("fullerenedatapraser.graph.algorithm.dual", ["src/fullerenedatapraser/graph/algorithm/dual.pyx"],
+                      include_dirs=[numpy.get_include()],
+                      # libraries=[],
                       # library_dirs=[],
-                      # ),
-                      ]
+                      ),
+        ]
         setup(use_scm_version={"version_scheme": "no-guess-dev"},
               ext_modules=cythonize(extensions, language_level=3),
-              include_dirs=[numpy.get_include()],
-              packages=find_packages()
+              # include_dirs=[numpy.get_include()],
+              # packages=find_packages()
               )
     except:  # noqa
         print(
