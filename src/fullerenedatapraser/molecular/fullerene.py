@@ -17,10 +17,22 @@ logger = Logger(__name__, console_on=True)
 
 class FullereneFamily(Atoms):
     def __init__(self, spiral, nospiralflag=False, atomADJ=None, circleADJ=None, **kwargs):
+        """
+
+        Parameters
+        ----------
+        spiral
+        nospiralflag
+        atomADJ
+        circleADJ
+        atoms:ase.atoms.Atoms
+            `Atoms` object for details.
+        """
         self.spiral = self._get_spiral(spiral, nospiralflag)
         self._atomADJ = atomADJ
         self._circleADJ = circleADJ
         if "atoms" in kwargs:
+            assert isinstance(kwargs["atoms"], ase.atoms.Atoms), "`atoms` must be an instance of `ase.atoms.Atoms`"
             super(FullereneFamily, self).__init__(symbols=kwargs["atoms"].symbols,
                                                   positions=kwargs["atoms"].positions,
                                                   info=kwargs["atoms"].info)
