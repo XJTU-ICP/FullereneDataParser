@@ -8,19 +8,11 @@
 
 from libc.stdlib cimport free
 import numpy as np
+cimport numpy as np
 
-cimport
-
-cimport
+cimport numpy as np
 import numpy as np
-from libc.stdlib cimport
-
-free
-numpy as np
-import numpy as np
-from libc.stdlib cimport
-
-free
+from libc.stdlib cimport free
 
 DTYPE = int
 ctypedef np.int_t DTYPE_t
