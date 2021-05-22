@@ -17,7 +17,8 @@ if __name__ == "__main__":
 
         extensions = [  # *find_pyx()
             Extension("fullerenedatapraser.graph.algorithm.dual", ["src/fullerenedatapraser/graph/algorithm/dual.pyx"],
-                      include_dirs=[numpy.get_include()],
+                      include_dirs=[numpy.get_include(), "e3rdpackage/boost"],
+                      language="c++",
                       # libraries=[],
                       # library_dirs=[],
                       ),
