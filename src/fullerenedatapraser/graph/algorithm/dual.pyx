@@ -6,59 +6,59 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
-from libc.stdlib cimport free
 import numpy as np
 cimport numpy as np
 
-cimport numpy as np
+from libcpp.vector cimport vector
+
+cimport
+numpy as np
 import numpy as np
-from libc.stdlib cimport free
+from libcpp.vector cimport
 
-DTYPE = int
-ctypedef np.int_t DTYPE_t
+vector
 
+cdef extern from "planar_dual.hpp" namespace "planar_dual":
+    cdef cppclass graph_circle_finder:
+        int edge_num # Size of edges, not vertex!
+        int *edge_origin # Array of edges.
+        int planar_flag # If the graph is planarity or not.
+        graph_circle_finder(int edge_num, int* edge_origin) except +
+        int privacy_get_graph_face_num() # Number of faces.
+        int privacy_get_face_vertex_num_sum() # Sum of vertex number in all faces. (Length of vertex_list and edge_list.)
+        int privacy_get_dual_edge_num() # Number of edges in dual graph.
+        void get_circle_vertex_num_list(vector[int]* vertex_num_list)
+        void get_circle_edge_num_list(vector[int]* edge_num_list)
+        void get_circle_vertex_list(vector[int]* vertex_num_list,vector[int]* vertex_list)
+        void get_circle_edge_list(vector[int]* edge_num_list,vector[vector[int]]* edge_list)
+        void get_dual_edge_list(int dual_edge_num, vector[vector[int]]* edge_list)
 
-cdef extern from "planar_dual.hpp" namespace "dualgraph":
-    cdef cppclass dual_graph_generator:
-        int origin_size
-        int *edge_origin
-        int dual_size
-        dual_graph_generator(int size, int* edge_origin) except +
-        void privacy_get_graph_edge_num()
-        int * privacy_get_dual_edges(int dual_size)
+cdef class py_graph_circle_finder:
+    cdef graph_circle_finder *c_finder
+    # cdef void * _data_vector_e
+    # cdef void * _data_vector_v
+    # cdef void * _data_vector_dual_edge
 
-cdef extern from "planar_dual.cpp":
-    pass
+    def __cinit__(self, int edge_num, int[:,:] edge_origin):
+        self.c_finder = new graph_circle_finder(edge_num, &edge_origin[0,0])
 
-cdef class py_dual_graph_generator:
-    cdef dual_graph_generator *c_dener
-    cdef void * _data
-
-    def __cinit__(self, int size, int[:,:] edge_origin):
-        self.c_dener = new dual_graph_generator(size, &edge_origin[0,0])
     def __dealloc__(self):
-        if self._data != NULL:
-            free(self._data)
+        del self.c_finder
 
-    def privacy_get_graph_edge_num(self):
-        self.c_dener.privacy_get_graph_edge_num()
 
-    def privacy_get_dual_edges(self, int dual_size):
-        # cdef int[:] Y = np.zeros([dual_size*2],dtype=int)
-        Y=np.asarray(<int[:dual_size,:2]> self.c_dener.privacy_get_dual_edges(dual_size))
-        # np.set_array_base(Y,self)
-        return Y
-
-    def _privacy_get_dual_edges(self):
-        dual_size=self.c_dener.dual_size
-        # cdef int[:] Y = np.zeros([dual_size*2],dtype=int)
-        Y=np.asarray(<int[:dual_size,:2]> self.c_dener.privacy_get_dual_edges(dual_size))
-        # np.set_array_base(Y,self)
-        return Y
+    def get_face_vertex_list(self):
+        cdef vector[int]* vertex_num_list=new vector[int](self.c_finder.privacy_get_graph_face_num())
+        self.c_finder.get_circle_vertex_num_list(&vertex_num_list[0])
+        cdef vector[int]* vertex_list=new vector[int](self.c_finder.privacy_get_face_vertex_num_sum())
+        self.c_finder.get_circle_vertex_list(&vertex_num_list[0], &vertex_list[0]);
+        face_v_slice,face_v= (np.asarray(<vector[int]&> vertex_num_list[0]), np.asarray(<vector[int]&> vertex_list[0]))
+        del vertex_num_list
+        del vertex_list
+        return list(face_v[face_v_slice[:idx].sum():face_v_slice[:idx+1].sum()] for idx in range(self.face_size))
 
     @property
-    def origin_size(self):
-        return self.c_dener.origin_size
+    def face_size(self):
+        return self.c_finder.privacy_get_graph_face_num()
     @property
     def dual_size(self):
-        return self.c_dener.dual_size
+        return self.c_finder.privacy_get_dual_edge_num()

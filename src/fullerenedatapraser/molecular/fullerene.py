@@ -32,7 +32,7 @@ class FullereneFamily(Atoms):
         self._atomADJ = atomADJ
         self._circleADJ = circleADJ
         if "atoms" in kwargs:
-            assert isinstance(kwargs["atoms"], ase.atoms.Atoms), "`atoms` must be an instance of `ase.atoms.Atoms`"
+            assert isinstance(kwargs["atoms"], Atoms), "`atoms` must be an instance of `ase.atoms.Atoms`"
             super(FullereneFamily, self).__init__(symbols=kwargs["atoms"].symbols,
                                                   positions=kwargs["atoms"].positions,
                                                   info=kwargs["atoms"].info)
