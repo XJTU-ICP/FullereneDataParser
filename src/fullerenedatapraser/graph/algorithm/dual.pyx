@@ -11,12 +11,9 @@ cimport numpy as np
 
 from libcpp.vector cimport vector
 
-cimport
-numpy as np
+cimport numpy as np
 import numpy as np
-from libcpp.vector cimport
-
-vector
+from libcpp.vector cimport vector
 
 cdef extern from "planar_dual.hpp" namespace "planar_dual":
     cdef cppclass graph_circle_finder:
