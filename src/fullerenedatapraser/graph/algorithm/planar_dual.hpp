@@ -120,7 +120,7 @@ namespace planar_dual
     int edge_num;
     int *edge_origin;
     int planar_flag = 0;
-    graph_circle_finder::graph_circle_finder(const int edge_num, const int *edge_origin)
+    graph_circle_finder(const int edge_num, const int *edge_origin)
     {
       graph g;
       for (int i = 0; i < edge_num; i++)
@@ -156,15 +156,15 @@ namespace planar_dual
       }
     }
 
-    int graph_circle_finder::privacy_get_graph_face_num()
+    int privacy_get_graph_face_num()
     {
       return vector_e.size();
     }
-    int graph_circle_finder::privacy_get_graph_dual_edges_num()
+    int privacy_get_graph_dual_edges_num()
     {
       return vector_dual_edge.size();
     }
-    int graph_circle_finder::privacy_get_face_vertex_num_sum()
+    int privacy_get_face_vertex_num_sum()
     {
       int idx = 0;
       for (int i = 0; i < vector_v.size(); i++)
@@ -206,7 +206,7 @@ namespace planar_dual
       }
     }
 
-    int graph_circle_finder::privacy_get_dual_edge_num()
+    int privacy_get_dual_edge_num()
     {
       return vector_dual_edge.size();
     }
