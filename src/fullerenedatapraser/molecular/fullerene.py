@@ -43,7 +43,7 @@ class FullereneFamily(Atoms):
     @property
     def atomADJ(self):
         if self._atomADJ is not None:
-            return self.atomADJ
+            return self._atomADJ
         else:
             return self.calculated_atomADJ
 
