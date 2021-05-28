@@ -5,6 +5,7 @@
 # @File    : fullerene.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
+import warnings
 
 import networkx as nx
 from ase import Atoms
@@ -29,10 +30,11 @@ class FullereneFamily(Atoms):
             `Atoms` object for details.
         """
         self.spiral = self._get_spiral(spiral, nospiralflag)
+        self.nospiralflag = nospiralflag
         self._atomADJ = atomADJ
         self._circleADJ = circleADJ
         if "atoms" in kwargs:
-            assert isinstance(kwargs["atoms"], Atoms), "`atoms` must be an instance of `ase.atoms.Atoms`"
+            assert isinstance(kwargs["atoms"], Atoms), f"`atoms` must be an instance of `ase.atoms.Atoms`, got {type(kwargs['atoms'])}"
             super(FullereneFamily, self).__init__(symbols=kwargs["atoms"].symbols,
                                                   positions=kwargs["atoms"].positions,
                                                   info=kwargs["atoms"].info)
@@ -87,15 +89,57 @@ class FullereneFamily(Atoms):
     def graph(self):
         return nx.from_numpy_array(self.atomADJ, create_using=nx.Graph)
 
+    @lazy_property
+    def cycle_finder(self):
+        raise NotImplementedError
+
+    def get_fullerenecage(self):
+        """
+        `get_fullerenecage`: return a FullereneCage Instance.
+        Returns
+        -------
+        FullereneCage:
+
+        """
+        warnings.warn(f"This Function `get_fullerene` is still in progress")
+        return FullereneCage(spiral=self.spiral,nospiralflag=self.nospiralflag,atoms=self)
+
+
+class FullereneCage(FullereneFamily):
+    """
+    One Cage which is planarity in FullereneFamily.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(FullereneCage, self).__init__(*args, **kwargs)
+
+    def _check_planarity(self):
+        raise NotImplementedError
+
+    @lazy_property
+    def circle_finder(self):
+        from fullerenedatapraser.graph.algorithm import dual
+        return dual.py_graph_circle_finder(len(self.graph.edges), np.array(self.graph.edges).data)
+
+    @lazy_property
+    def circle_vertex_list(self):
+        return self.circle_finder.get_face_vertex_list()
+
+    def draw(self,deformation_ratio=0.2, path=None):
+        from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
+        planarity_graph_draw(self,deformation_ratio=deformation_ratio, path=path)
+
 
 if __name__ == '__main__':
     import ase.build
-    import matplotlib.pyplot as plt
     import numpy as np
+    from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
 
-    np.set_printoptions(threshold=np.inf)
+    # np.set_printoptions(threshold=np.inf)
+    # np.set_printoptions(linewidth=500)
 
     atoms = ase.build.molecule("C60")
     f = FullereneFamily(spiral=1812, atoms=atoms)
-    nx.draw(f.graph)
-    plt.show()
+    f = f.get_fullerenecage()
+    # print(f.circle_vertex_list)
+    f.draw(deformation_ratio=0.3,path=None)
