@@ -45,6 +45,8 @@ def simple_read_xyz_xtb(filepath, index=None, read_comment=True):
                         raise FileCommentError(f"Comments not recognizable: {lines[n - 1]}.\n Try to set `read_comment=False`.")
                     else:
                         comments = {}
+                except ValueError:
+                    raise FileCommentError(f"It seems your comment is not format as 'xx:dd'. Please check your file or set `read_comment=False` in `simple_read_xyz_xtb()`.")
             else:
                 comments = {}
             for line in lines[n:n + natoms]:

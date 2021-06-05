@@ -20,7 +20,8 @@ def planarity_graph_draw(cage: FullereneCage,
                          pentage_alpha=0.5,
                          antialiased=True,
                          line_color="orange",
-                         line_alpha=0.5):
+                         line_alpha=0.5,
+                         atom_label=True):
     """
     Draw fullerene planarity graph combinating parrallel and hemi-sphere projection.
 
@@ -83,10 +84,6 @@ def planarity_graph_draw(cage: FullereneCage,
     ax = fig.add_subplot(111)
     # ax.scatter(project_axis_p[:, 0], project_axis_p[:, 1], project_axis_p[:, 2])
 
-    # draw edge lines
-    for edges in cage.graph.edges:
-        ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]], project_axis_sp_r[edges[1]], antialiased=antialiased, alpha=line_alpha))
-
     # draw circle and circle fills
     for circleone in circles:
         if len(circleone) == 5:
@@ -94,7 +91,20 @@ def planarity_graph_draw(cage: FullereneCage,
             ax.add_patch(mpatches.Polygon(np.array(xy).transpose(), color=pentage_color, antialiased=antialiased, alpha=pentage_alpha))
 
     # draw atoms
-    ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color, alpha=line_alpha)
+    if atom_label:
+        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color, alpha=line_alpha, s=150)
+        for i in range(cage.natoms):
+            ax.text(project_axis_sp_r[:, 0][i], project_axis_sp_r[:, 1][i], str(i + 1), fontsize=10,
+                    horizontalalignment='center',
+                    verticalalignment='center', )
+            pass
+        # draw edge lines
+        for edges in cage.graph.edges:
+            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]], project_axis_sp_r[edges[1]], antialiased=antialiased, alpha=line_alpha, shrinkA=7, shrinkB=7))
+    else:
+        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color, alpha=line_alpha)
+        for edges in cage.graph.edges:
+            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]], project_axis_sp_r[edges[1]], antialiased=antialiased, alpha=line_alpha, shrinkA=5, shrinkB=5))
 
     # set the figure
     plt.axis("equal")

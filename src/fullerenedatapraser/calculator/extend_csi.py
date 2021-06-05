@@ -48,7 +48,7 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
-    csi_adj = fullerene.atomADJ
+    # csi_adj = fullerene.atomADJ # not used actually
 
     distances=fullerene.get_all_distances()
     mask = np.ones_like(distances)-np.eye(fullerene.natoms)
@@ -152,26 +152,56 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir,para = 7, _suffix=
 
 
 if __name__ == '__main__':
-    num=60
-    skip=False # Use current file
+    from ase.units import  Hartree,eV
+    num=80
+    skip=True # Use current file
     atomfile = r"C:\Work\CODE\DATA\bin\ADJ"+str(num)
     circlefile = r"C:\Work\CODE\DATA\circleADJ\ADJ"+str(num)
     xyz_dir = r"C:\Work\CODE\DATA\fullerxTBcal\xTBcal\C"+str(num)
     para=7
-    target_path = r"C:\Work\CODE\DATA\xCSI7\C"+str(num)+"_xCSI.npz"
+    def target_path(num):
+        return r"C:\Work\CODE\DATA\xCSI7\C"+str(num)+"_xCSI.npz"
     # set ratio of distance part
     if not skip:
-        args = atomfile, circlefile, xyz_dir, target_path, para
+        args = atomfile, circlefile, xyz_dir, target_path(num), para
         _store_csi(args)
-    data=np.load(target_path)
-    csi=data["csi_list"]
-    en=data["energy"]
+    csi=[]
+    en=[]
+    for num in (40,50,60,70,80):
+        data=np.load(target_path(num))
+        csi.extend(-data["csi_list"][:,:num//2].sum(-1))
+        en.extend(data["energy"]*Hartree/eV)
     import matplotlib.pyplot as plt
+    from tqdm import trange
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=[10,10])
     ax=fig.add_subplot(111)
-    # print(csi)
-    csi=csi[:,:30].sum(-1)
-    # print(csi)
-    ax.scatter(csi,en,marker="x")
+
+
+    # fullerxtb_pred=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_pred.npy")
+    # fullerxtb_ref=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_ref.npy")
+    # fullerxtb_diff=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_dif.npy")
+
+    # ax=fig.add_subplot(111)
+    # print(len(csi))
+    # print(len(fullerxtb_pred))
+    # ax.scatter(fullerxtb_ref,fullerxtb_pred-fullerxtb_ref,marker="x")
+    # diff=fullerxtb_pred-fullerxtb_ref
+    # fullerenextb_filtered=[]
+    # error=[]
+    # idx=0
+    # for ref1 in tqdm(en):
+    #     ref2=np.inf
+    #     while not np.allclose(ref1,ref2,rtol=1.e-8,atol=1.e-4):
+    #         ref2 = fullerxtb_ref[idx]
+    #         idx += 1
+    #     fullerenextb_filtered.append(diff[idx-1])
+    #     error.append(ref1-ref2)
+        # print(diff[idx-1],ref1*eV/Hartree,ref2*eV/Hartree,fullerxtb_ref[idx-1],fullerxtb_pred[idx-1])
+
+
+    # ax.scatter(fullerxtb_ref,fullerxtb_pred-fullerxtb_ref,marker="x",color="red")
+    ax.scatter(en,csi,marker="x")
+    # ax.scatter(fullerenextb_filtered, csi, marker="x")
+    # ax.scatter(fullerenextb_filtered, error, marker="x")
     plt.show()
