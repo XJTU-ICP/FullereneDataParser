@@ -7,7 +7,15 @@
     Learn more under: https://pyscaffold.org/
 """
 
-from Cython.Build import cythonize
+USE_CYTHON = False
+try:
+    from Cython.Build import cythonize
+    USE_CYTHON = True
+except ModuleNotFoundError:
+    USE_CYTHON = False
+
+ext ='.pyx'if USE_CYTHON else'.cpp'
+
 from setuptools import Extension
 from setuptools import setup
 
@@ -16,7 +24,7 @@ if __name__ == "__main__":
         import numpy
 
         extensions = [  # *find_pyx()
-            Extension("fullerenedatapraser.graph.algorithm.dual", ["src/fullerenedatapraser/graph/algorithm/dual.pyx"],
+            Extension("fullerenedatapraser.graph.algorithm.dual", ["src/fullerenedatapraser/graph/algorithm/dual"+ext],
                       include_dirs=[numpy.get_include(), "e3rdpackage/boost"],
                       language="c++",
                       # libraries=[],
