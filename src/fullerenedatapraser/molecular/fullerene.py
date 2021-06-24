@@ -125,6 +125,10 @@ class FullereneCage(FullereneFamily):
     def circle_vertex_list(self):
         return self.circle_finder.get_face_vertex_list()
 
+    @lazy_property
+    def dual_adj(self):
+        return self.circle_finder.get_dual_edge_list()
+
     def draw(self,deformation_ratio=0.2, path=None,atom_label=True):
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
         planarity_graph_draw(self,deformation_ratio=deformation_ratio, path=path,atom_label=atom_label)

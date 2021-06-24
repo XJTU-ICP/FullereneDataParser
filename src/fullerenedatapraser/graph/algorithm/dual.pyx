@@ -47,11 +47,18 @@ cdef class py_graph_circle_finder:
         cdef vector[int]* vertex_num_list=new vector[int](self.c_finder.privacy_get_graph_face_num())
         self.c_finder.get_circle_vertex_num_list(&vertex_num_list[0])
         cdef vector[int]* vertex_list=new vector[int](self.c_finder.privacy_get_face_vertex_num_sum())
-        self.c_finder.get_circle_vertex_list(&vertex_num_list[0], &vertex_list[0]);
+        self.c_finder.get_circle_vertex_list(&vertex_num_list[0], &vertex_list[0])
         face_v_slice,face_v= (np.asarray(<vector[int]&> vertex_num_list[0]), np.asarray(<vector[int]&> vertex_list[0]))
         del vertex_num_list
         del vertex_list
         return list(face_v[face_v_slice[:idx].sum():face_v_slice[:idx+1].sum()] for idx in range(self.face_size))
+
+    def get_dual_edge_list(self):
+        cdef vector[vector[int]]* dual_edge_list=new vector[vector[int]](self.c_finder.privacy_get_dual_edge_num(),vector[int](2,0))
+        self.c_finder.get_dual_edge_list(self.dual_size, &dual_edge_list[0])
+        dual_edge= np.asarray(<vector[vector[int]]&> dual_edge_list[0])
+        del dual_edge_list
+        return list(dual_edge)
 
     @property
     def face_size(self):
