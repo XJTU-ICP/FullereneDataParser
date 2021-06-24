@@ -40,8 +40,10 @@ def calculate_csi(fullerene: FullereneFamily):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
+    adj = fullerene.get_fullerenecage().dual_adj
+    Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:, None]).sum() / 2
     chi = np.linalg.eigh(fullerene.atomADJ)
-    return chi[0], chi[1]
+    return chi[0], chi[1], Napp
 
 
 def store_csi(atomfile, circlefile, xyz_dir, target_path):
