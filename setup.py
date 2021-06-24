@@ -32,7 +32,7 @@ if __name__ == "__main__":
                       ),
         ]
         setup(use_scm_version={"version_scheme": "no-guess-dev"},
-              ext_modules=cythonize(extensions, language_level=3),
+              ext_modules=extensions if not USE_CYTHON else cythonize(extensions, language_level=3),
               # include_dirs=[numpy.get_include()],
               # packages=find_packages()
               )
