@@ -8,6 +8,7 @@
 import warnings
 
 import networkx as nx
+import numpy as np
 from ase import Atoms
 from ase.neighborlist import natural_cutoffs, NeighborList
 from fullerenedatapraser.util.functools import lazy_property
@@ -90,7 +91,7 @@ class FullereneFamily(Atoms):
         return nx.from_numpy_array(self.atomADJ, create_using=nx.Graph)
 
     @lazy_property
-    def cycle_finder(self):
+    def circle_finder(self):
         raise NotImplementedError
 
     def get_fullerenecage(self):
@@ -101,8 +102,8 @@ class FullereneFamily(Atoms):
         FullereneCage:
 
         """
-        warnings.warn(f"This Function `get_fullerenecage` is still in progress")
-        return FullereneCage(spiral=self.spiral,nospiralflag=self.nospiralflag,atoms=self)
+        # warnings.warn(f"This Function `get_fullerenecage` is still in progress")
+        return FullereneCage(spiral=self.spiral, nospiralflag=self.nospiralflag, atoms=self)
 
 
 class FullereneCage(FullereneFamily):
@@ -126,17 +127,29 @@ class FullereneCage(FullereneFamily):
         return self.circle_finder.get_face_vertex_list()
 
     @lazy_property
-    def dual_adj(self):
-        return self.circle_finder.get_dual_edge_list()
+    def dual_size(self):
+        return self.circle_finder.face_size
 
-    def draw(self,deformation_ratio=0.2, path=None,atom_label=True):
+    @lazy_property
+    def dual_edge_list(self):
+        return np.array(self.circle_finder.get_dual_edge_list())
+
+    @lazy_property
+    def dual_adj(self):
+        dual_edges = self.dual_edge_list
+        dual_size = self.dual_size
+        adj = np.zeros([dual_size, dual_size])
+        adj[dual_edges.transpose()[0], dual_edges.transpose()[1]] = 1
+        adj[dual_edges.transpose()[1], dual_edges.transpose()[0]] = 1
+        return adj
+
+    def draw(self, deformation_ratio=0.2, path=None, atom_label=True):
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
-        planarity_graph_draw(self,deformation_ratio=deformation_ratio, path=path,atom_label=atom_label)
+        planarity_graph_draw(self, deformation_ratio=deformation_ratio, path=path, atom_label=atom_label)
 
 
 if __name__ == '__main__':
     import ase.build
-    import numpy as np
     from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
 
     # np.set_printoptions(threshold=np.inf)

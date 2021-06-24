@@ -40,7 +40,7 @@ def calculate_csi(fullerene: FullereneFamily):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
-    chi = np.linalg.eigh(fullerene.atomADJ)[:fullerene.natoms // 2]
+    chi = np.linalg.eigh(fullerene.atomADJ)
     return chi[0], chi[1]
 
 
@@ -66,6 +66,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path):
     spiral_num_list = []
     csi_list = []
     energy_list = []
+    napp_list = []
     pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     adjgener = adj_gener(atomfile, circlefile)
@@ -84,7 +85,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path):
         spiral_num_list.append(spiral_num)
         csi_list.append(calculate_csi(fuller)[0])
         energy_list.append(energy)
-    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list))
+    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list), napp=napp_list)
 
 
 def _store_csi(args):

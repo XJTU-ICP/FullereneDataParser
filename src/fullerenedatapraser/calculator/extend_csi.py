@@ -65,7 +65,7 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7):
 
 
     sum_chi = np.linalg.eigh(t* extend_adj*mask)
-    sum_chi=sum_chi[:fullerene.natoms // 2]
+    sum_chi=sum_chi
 
     return sum_chi[0],sum_chi[1]
 
