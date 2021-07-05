@@ -13,8 +13,9 @@ from fullerenedatapraser.molecular.fullerene import FullereneCage
 
 
 def planarity_graph_draw(cage: FullereneCage,
-                         deformation_ratio: float = 0.2,
-                         projection_point: str = None,
+                         sphere_ratio: float = 0.8,
+                         parr_ratio: float = 0.2,
+                         projection_point: int = 0,
                          path=None,
                          pentage_color="orange",
                          pentage_alpha=0.5,
@@ -29,7 +30,7 @@ def planarity_graph_draw(cage: FullereneCage,
     ----------
     cage:FullereneCage
         A planaritable graph of fullerene family.
-    deformation_ratio:float
+    sphere_ratio, parr_ratio:float
         ratio to control graph deformation between projection of platform and hemi-sphere.
     projection_point:str
         methods of choosing projection point
@@ -49,14 +50,31 @@ def planarity_graph_draw(cage: FullereneCage,
     pos_sphere = center_full + (cage.positions - center_full) / np.linalg.norm(cage.positions - center_full, axis=1)[:, None] * diameter_full
 
     # TODO: Group Point method.
-    if projection_point is None:
+    if 1:
         circles = cage.circle_vertex_list
+        projection_point_flag = 0
+        circle_from = None
         for circle in circles:
-            if len(circle) == 6:
-                break
-        radius = np.average(np.linalg.norm(pos_sphere[circle] - center_full, axis=1))
+            if projection_point>=0:
+                if len(circle) == 6:
+                    if projection_point_flag == projection_point:
+                        circle_from=circle
+                        break
+                    else:
+                        projection_point_flag+=1
+            else:
+                if len(circle) == 5:
+                    if projection_point_flag-1 == projection_point:
+                        circle_from=circle
+                        break
+                    else:
+                        projection_point_flag-=1
+        if circle_from is None:
+            if projection_point>=0:
+                raise RuntimeError("No Heptagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
+        radius = np.average(np.linalg.norm(pos_sphere[circle_from] - center_full, axis=1))
 
-    center_circle = np.average(pos_sphere[circle], axis=0)
+    center_circle = np.average(cage.positions[circle_from], axis=0)
     project_direct = (center_circle - center_full) / np.linalg.norm((center_circle - center_full))
     center_circle = project_direct * radius
 
@@ -69,7 +87,7 @@ def planarity_graph_draw(cage: FullereneCage,
     # projection from hemisphere to platform
     pro_t = (-project_direct * project_axis_s).sum(-1) - pro_radius - (-project_direct * center_circle).sum(-1)
     project_axis_sp = project_axis_s - pro_t[:, None] * -project_direct
-    project_axis_sp = (1 * project_axis_sp + deformation_ratio * project_axis_p) / 2
+    project_axis_sp = (sphere_ratio * project_axis_sp + parr_ratio * project_axis_p) / 2
 
     # rotate to XoY
     mx, my, mz = project_direct
