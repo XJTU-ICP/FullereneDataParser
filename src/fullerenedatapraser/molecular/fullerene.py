@@ -7,9 +7,10 @@
 # ====================================== #
 import warnings
 
+import matplotlib.pyplot as plt
 import networkx as nx
-import numpy as np
 from ase import Atoms
+import numpy as np
 from ase.neighborlist import natural_cutoffs, NeighborList
 from fullerenedatapraser.util.functools import lazy_property
 from fullerenedatapraser.util.logger import Logger
@@ -87,7 +88,7 @@ class FullereneFamily(Atoms):
         raise NotImplementedError
 
     @lazy_property
-    def graph(self):
+    def graph(self) -> nx.Graph:
         return nx.from_numpy_array(self.atomADJ, create_using=nx.Graph)
 
     @lazy_property
@@ -126,31 +127,34 @@ class FullereneCage(FullereneFamily):
     def circle_vertex_list(self):
         return self.circle_finder.get_face_vertex_list()
 
-    @lazy_property
-    def dual_size(self):
-        return self.circle_finder.face_size
+    def draw(self, sphere_ratio=0.2, parr_ratio=0.8, path=None, atom_label=True, projection_circle_idx=0):
+        """
 
-    @lazy_property
-    def dual_edge_list(self):
-        return np.array(self.circle_finder.get_dual_edge_list())
+        Parameters
+        ----------
+        deformation_ratio
+        path
+        atom_label
+        projection_circle_idx:int
+            if projection_circle_idx>=0:
+                project from hexagon,
+            if projection_circle_idx<0：
+                project from pentagon
+        Returns
+        -------
 
-    @lazy_property
-    def dual_adj(self):
-        dual_edges = self.dual_edge_list
-        dual_size = self.dual_size
-        adj = np.zeros([dual_size, dual_size])
-        adj[dual_edges.transpose()[0], dual_edges.transpose()[1]] = 1
-        adj[dual_edges.transpose()[1], dual_edges.transpose()[0]] = 1
-        return adj
-
-    def draw(self, deformation_ratio=0.2, path=None, atom_label=True):
+        """
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
-        planarity_graph_draw(self, deformation_ratio=deformation_ratio, path=path, atom_label=atom_label)
+        planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
 
 
 if __name__ == '__main__':
     import ase.build
+    from ase.visualize import view
     from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
+    import networkx as nx
+
+    nx.read_graph6
 
     # np.set_printoptions(threshold=np.inf)
     # np.set_printoptions(linewidth=500)
@@ -159,4 +163,5 @@ if __name__ == '__main__':
     f = FullereneFamily(spiral=1812, atoms=atoms)
     f = f.get_fullerenecage()
     # print(f.circle_vertex_list)
-    f.draw(deformation_ratio=0.3,path=None)
+    # f.draw(sphere_ratio=0.8,parr_ratio=0.5,path=r"C:\Users\45990\Desktop\31876.png")
+    f.draw(sphere_ratio=0.8, parr_ratio=0.4)
