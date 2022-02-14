@@ -71,7 +71,7 @@ def planarity_graph_draw(cage: FullereneCage,
                         projection_point_flag-=1
         if circle_from is None:
             if projection_point>=0:
-                raise RuntimeError("No Heptagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
+                raise RuntimeError("No Pentagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
         radius = np.average(np.linalg.norm(pos_sphere[circle_from] - center_full, axis=1))
 
     center_circle = np.average(cage.positions[circle_from], axis=0)
@@ -131,10 +131,10 @@ def planarity_graph_draw(cage: FullereneCage,
     plt.yticks([])
 
     if not path:
-        plt.show()
+        pass
     else:
         fig.savefig(path)
-
+    return ax,project_axis_sp_r
 
 def hemisphere_projection_graph(pro_radius, pos_sphere, projection_from):
     """

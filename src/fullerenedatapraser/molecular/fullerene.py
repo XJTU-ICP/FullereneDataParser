@@ -104,7 +104,7 @@ class FullereneFamily(Atoms):
 
         """
         # warnings.warn(f"This Function `get_fullerenecage` is still in progress")
-        return FullereneCage(spiral=self.spiral, nospiralflag=self.nospiralflag, atoms=self)
+        return FullereneCage(spiral=self.spiral, nospiralflag=self.nospiralflag, atoms=self,atomADJ=self.atomADJ,circleADJ=self.circleADJ)
 
 
 class FullereneCage(FullereneFamily):
@@ -145,7 +145,8 @@ class FullereneCage(FullereneFamily):
 
         """
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
-        planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
+        ax,graph_pos=planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
+        return ax,graph_pos
 
 
 if __name__ == '__main__':

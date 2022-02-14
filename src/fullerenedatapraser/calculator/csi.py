@@ -7,6 +7,7 @@
 # ====================================== #
 
 import os
+import pathlib
 import re
 from multiprocessing import Pool, RLock, freeze_support
 
@@ -40,7 +41,7 @@ def calculate_csi(fullerene: FullereneFamily):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
-    adj = fullerene.get_fullerenecage().dual_adj
+    adj = fullerene.get_fullerenecage().circleADJ
     Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:, None]).sum() / 2
     chi = np.linalg.eigh(fullerene.atomADJ)
     return chi[0], chi[1], Napp
@@ -96,7 +97,7 @@ def _store_csi(args):
     store_csi(atomfile, circlefile, xyz_dir, target_path)
 
 
-def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
+def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, recalculate=True, npz_file_suffix="CSI", number_mask=None):
     """
     Batch process of calculating CSI
 
@@ -114,13 +115,20 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir):
         circlefile = os.path.join(circledir, basename)
 
         # update = lambda *args: pbar.update()
-        basename = "C" + pa.findall(os.path.splitext(atomfile)[0])[-1]
+        number = pa.findall(os.path.splitext(atomfile)[0])[-1]
+        if number_mask is not None:
+            if int(number) not in number_mask:
+                continue
+        basename = "C" + number
         xyz_dir = os.path.join(xyz_root_dir, basename)
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         try:
-            target_path = os.path.join(target_dir, basename + "_CSI.npz")
+            target_path = os.path.join(target_dir, basename + f"_{npz_file_suffix}.npz")
             args = atomfile, circlefile, xyz_dir, target_path
+            if not recalculate:
+                if pathlib.Path(target_path).exists():
+                    continue
             po.apply_async(func=_store_csi, args=(args,), error_callback=print_error)
         except FileNotFoundError:
             continue
