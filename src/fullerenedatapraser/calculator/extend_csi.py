@@ -16,6 +16,7 @@ import logging
 import os
 import re
 from multiprocessing import Pool, RLock, freeze_support
+import pathlib
 
 import numpy as np
 from fullerenedatapraser.data.spiral import adj_gener
@@ -47,7 +48,7 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
-    assert fullerene.info["charge"] % 2 == 0, f"Can't Deal with Even number charged Fullerene Now. Got charge:{fullerene.info['charge']}."
+    assert fullerene.info["charge"] % 2 == 0, f"Only Deal with Even number charged Fullerene Now. Got charge:{fullerene.info['charge']}."
     # csi_adj = fullerene.atomADJ # not used actually
 
     distances = fullerene.get_all_distances()
@@ -61,12 +62,15 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7):
 
     t = para
 
-    extend_adj = orbital_p_cos * 1 / (distances + 0.0001) ** 4
+    extend_adj = orbital_p_cos * 1 / (distances + 0.00001) ** 4
 
     sum_chi = np.linalg.eigh(t * extend_adj * mask)
-    sum_chi = sum_chi[:fullerene.natoms // 2 - int(fullerene.info["charge"])//2]
 
-    return sum_chi[0], sum_chi[1]
+    adj = fullerene.get_fullerenecage().circleADJ
+    Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:, None]).sum() / 2
+    # sum_chi = sum_chi[:fullerene.natoms // 2 - int(fullerene.info["charge"])//2]
+
+    return sum_chi[0], sum_chi[1], Napp
 
 
 def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_ext_csi, charge=0):
@@ -91,6 +95,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_
     spiral_num_list = []
     csi_list = []
     energy_list = []
+    napp_list=[]
     pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     adjgener = adj_gener(atomfile, circlefile)
@@ -98,18 +103,21 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_
         adj = next(adjgener)
         pbar.set_description(f'{xyz_path}')
         pbar.update()
-        for f in list(simple_read_xyz_xtb(xyz_path)):
-            spiral_num = int(pa.findall(os.path.splitext(xyz_path)[0])[-1])
-            assert spiral_num == adj["spiral_num"]
-            atomadj = adj["atomadj"]
-            circleadj = adj["circleadj"]
-            energy = f.info["energy"]
-            f.info["charge"] = charge
-            fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
-            spiral_num_list.append(spiral_num)
-            csi_list.append(_func(fuller, para=para)[0])
-            energy_list.append(energy)
-    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list))
+        f = list(simple_read_xyz_xtb(xyz_path))[-1]
+
+        spiral_num = int(pa.findall(os.path.splitext(xyz_path)[0])[-1])
+        assert spiral_num == adj["spiral_num"]
+        atomadj = adj["atomadj"]
+        circleadj = adj["circleadj"]
+        energy = f.info["energy"]
+        f.info["charge"] = charge
+        fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
+        spiral_num_list.append(spiral_num)
+        csi_val,_,napp_val=_func(fuller, para=para)
+        csi_list.append(csi_val)
+        napp_list.append(napp_val)
+        energy_list.append(energy)
+    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list),napp = napp_list)
 
 
 def _store_csi(args):
@@ -118,7 +126,7 @@ def _store_csi(args):
     store_csi(atomfile, circlefile, xyz_dir, target_path, para, charge=charge)
 
 
-def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, _suffix="xCSI", charge=0):
+def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0, recalculate=True, npz_file_suffix="xCSI", number_mask=None):
     """
     Batch process of calculating extended-CSI
 
@@ -134,15 +142,23 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, _suffix="
     for atomfile in recursion_files(atomdir, format=""):
         basename = os.path.basename(atomfile)
         circlefile = os.path.join(circledir, basename)
-
         # update = lambda *args: pbar.update()
-        basename = "C" + pa.findall(os.path.splitext(atomfile)[0])[-1]
+        number = pa.findall(os.path.splitext(atomfile)[0])[-1]
+
+        if number_mask is not None:
+            if int(number) not in number_mask:
+                continue
+
+        basename = "C" + number
         xyz_dir = os.path.join(xyz_root_dir, basename)
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         try:
-            target_path = os.path.join(target_dir, basename + f"_{_suffix}.npz")
+            target_path = os.path.join(target_dir, basename + f"_{npz_file_suffix}.npz")
             args = atomfile, circlefile, xyz_dir, target_path, para, charge
+            if not recalculate:
+                if pathlib.Path(target_path).exists():
+                    continue
             po.apply_async(func=_store_csi, args=(args,), error_callback=print_error)
         except FileNotFoundError:
             continue
