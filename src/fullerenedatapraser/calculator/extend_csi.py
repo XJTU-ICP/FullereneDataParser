@@ -26,19 +26,24 @@ from fullerenedatapraser.molecular.fullerene import FullereneFamily
 from fullerenedatapraser.util.config import setGlobValue
 from fullerenedatapraser.util.logger import Logger
 from fullerenedatapraser.util.mp import print_error
+from fullerenedatapraser.util.geometry import sphere_center_of_four_points
 from tqdm import tqdm
 
 setGlobValue("log_level", logging.DEBUG)
 logger = Logger(__name__, console_on=True)
 
 
-def calculate_ext_csi(fullerene: FullereneFamily, para=7):
+def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
     """
     Implemention of extended
     Parameters
     ----------
     fullerene:FullereneFamily
         molecule Instance of Fullerene.
+    para:int
+        multiple value to adj
+    distance_cutoff: float or None
+        distance more than cutoff will be regard as 0
     Returns
     -------
         CSI
@@ -53,11 +58,23 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7):
 
     distances = fullerene.get_all_distances()
     mask = np.ones_like(distances) - np.eye(fullerene.natoms)
-    dis_vec = fullerene.get_all_distances(vector=True)
-    dis_vec /= (distances + 0.00001)[:, :, None]
-    orbital_p_vec = (distances[:, :, None] * dis_vec).sum(-2)
-    orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
+    # dis_vec = fullerene.get_all_distances(vector=True)
+    # dis_vec /= (distances + 0.00001)[:, :, None]
+    # orbital_p_vec = (distances[:, :, None] * dis_vec).sum(-2)
+    # orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
 
+    orbital_p_vec = np.zeros([fullerene.natoms,3])
+    for i in range(fullerene.natoms):
+        O = sphere_center_of_four_points(fullerene.positions[np.where(fullerene.atomADJ[i]==1)][0],
+                                         fullerene.positions[np.where(fullerene.atomADJ[i]==1)][1],
+                                         fullerene.positions[np.where(fullerene.atomADJ[i]==1)][2],
+                                         fullerene.positions[i])
+        orbital_p_vec[i]=fullerene.positions[i]-O
+    orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
+    if distance_cutoff:
+        dis_mask_idx = np.where(distances>distance_cutoff)
+        distances[dis_mask_idx]=0
+        mask[dis_mask_idx]=0
     orbital_p_cos = (orbital_p_vec[None, :] * orbital_p_vec[:, None]).sum(-1) / 2 + 0.5
 
     t = para
@@ -95,7 +112,7 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_
     spiral_num_list = []
     csi_list = []
     energy_list = []
-    napp_list=[]
+    napp_list = []
     pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     adjgener = adj_gener(atomfile, circlefile)
@@ -113,20 +130,20 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_
         f.info["charge"] = charge
         fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
         spiral_num_list.append(spiral_num)
-        csi_val,_,napp_val=_func(fuller, para=para)
+        csi_val, _, napp_val = _func(fuller, para=para)
         csi_list.append(csi_val)
         napp_list.append(napp_val)
         energy_list.append(energy)
-    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list),napp = napp_list)
+    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list), napp=napp_list)
 
 
 def _store_csi(args):
     logger.debug(f"_store_csi:{args}")
-    atomfile, circlefile, xyz_dir, target_path, para, charge = args
-    store_csi(atomfile, circlefile, xyz_dir, target_path, para, charge=charge)
+    atomfile, circlefile, xyz_dir, target_path, para, _func, charge = args
+    store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=_func, charge=charge)
 
 
-def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0, recalculate=True, npz_file_suffix="xCSI", number_mask=None):
+def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0, recalculate=True, npz_file_suffix="xCSI", number_mask=None, _func=calculate_ext_csi):
     """
     Batch process of calculating extended-CSI
 
@@ -155,7 +172,7 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0,
             os.mkdir(target_dir)
         try:
             target_path = os.path.join(target_dir, basename + f"_{npz_file_suffix}.npz")
-            args = atomfile, circlefile, xyz_dir, target_path, para, charge
+            args = atomfile, circlefile, xyz_dir, target_path, para, _func, charge
             if not recalculate:
                 if pathlib.Path(target_path).exists():
                     continue
