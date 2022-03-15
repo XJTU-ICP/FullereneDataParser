@@ -49,7 +49,7 @@ def calculate_origin_csi(eval, napp, charged):
     napp: int
         Number of adjacent pentagon pairs. (Each pentagon-pentagon shared edge counts.)
 
-    charge: int
+    charged: int
         Charge.
 
     Returns
@@ -85,7 +85,7 @@ def calculate_origin_csi_without_napp(eval, napp, charged):
     napp: int
         Number of adjacent pentagon pairs. (Each pentagon-pentagon shared edge counts.)
 
-    charge: int
+    charged: int
         Charge.
 
     Returns
@@ -121,7 +121,7 @@ def calculate_origin_csi_only_napp(eval, napp, charged):
     napp: int
         Number of adjacent pentagon pairs. (Each pentagon-pentagon shared edge counts.)
 
-    charge: int
+    charged: int
         Charge.
 
     Returns
@@ -132,10 +132,11 @@ def calculate_origin_csi_only_napp(eval, napp, charged):
     return 0.2 * napp
 
 
-def calculate_xcsi(eval, napp=None, charged=0):
+def calculate_xcsi(eval: np.ndarray, napp: bool = None, charged: int = 0):
     atomnum = eval.shape[-1]
-    evalsum = eval[:, :atomnum // 2 + charged // 2-1].sum(-1)
+    evalsum = eval[:, :atomnum // 2 + charged // 2 - 1].sum(-1)
     if napp is None:
         return evalsum
     else:
-        return evalsum+0.2*napp
+        return evalsum + 0.2 * napp
+
