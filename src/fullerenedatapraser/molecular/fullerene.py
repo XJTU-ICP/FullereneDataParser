@@ -5,6 +5,7 @@
 # @File    : fullerene.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
+from typing import Iterable
 
 import networkx as nx
 import numpy as np
@@ -123,7 +124,7 @@ class FullereneCage(FullereneFamily):
         return dual.py_graph_circle_finder(len(self.graph.edges), np.array(self.graph.edges).data)
 
     @lazy_property
-    def circle_vertex_list(self):
+    def circle_vertex_list(self) -> Iterable[np.ndarray]:
         return self.circle_finder.get_face_vertex_list()
 
     def draw(self, sphere_ratio=0.2, parr_ratio=0.8, path=None, atom_label=True, projection_circle_idx=0):

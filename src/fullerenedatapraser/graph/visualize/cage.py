@@ -44,14 +44,14 @@ def planarity_graph_draw(cage: FullereneCage,
 
     """
     center_full = np.average(cage.positions, axis=0)  # molecular geom-center
-
+    cage.positions = cage.positions-center_full
     # projection on a sphere to avoid extrem deformation of shell
     diameter_full = max(np.linalg.norm(cage.positions - center_full, axis=1))  # diameter of sphere to project first time
     pos_sphere = center_full + (cage.positions - center_full) / np.linalg.norm(cage.positions - center_full, axis=1)[:, None] * diameter_full
 
     # TODO: Group Point method.
     if 1:
-        circles = cage.circle_vertex_list
+        circles = cage.circle_vertex_list()
         projection_point_flag = 0
         circle_from = None
         for circle in circles:
