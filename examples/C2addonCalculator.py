@@ -9,13 +9,13 @@
 import os
 import shutil
 import sys
+import time
 
 import dpdispatcher
 import tqdm
 from dpdispatcher import Machine, Resources, Task, Submission, dlog
 from dpdispatcher.JobStatus import JobStatus
 from fullerenedatapraser.io.recursion import recursion_files
-import time
 
 dpdispatcher.dlog.handlers = [dpdispatcher.dlog.handlers[0]]
 
@@ -39,7 +39,7 @@ machine = Machine(batch_type="Slurm",
 resources = Resources(number_node=1,
                       cpu_per_node=4,
                       gpu_per_node=0,
-                      group_size=2,
+                      group_size=10,
                       queue_name="N16")
 
 
