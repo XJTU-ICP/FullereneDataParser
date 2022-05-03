@@ -14,10 +14,11 @@ from typing import Generator
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
+
 from fullerenedatapraser.io.recursion import recursion_files
 from fullerenedatapraser.util.logger import Logger
 from fullerenedatapraser.util.mp import print_error
-from tqdm import tqdm
 
 logger = Logger(__name__, console_on=True)
 
@@ -40,6 +41,7 @@ class SpiralFile:
         circle:bool
             File is content of circle or not. Default to atom adjacent.
         """
+        self.line = None
         self.path = path
         self.circle = circle
         if atom_num:
