@@ -76,13 +76,20 @@ def get_output_file_store_list(inputxtbname):
 
 TASK_TABLE = r"task_finished.table"
 
-SOURCE_ROOT = r"C:\Work\CODE\DATA\fullerxTBcal\C2addon"
+SOURCE_ROOT = r"D:\CODE\#DATASETS\FullDB\C2addon"
+from C2addonGenerator import lazy_mkdir
+
+lazy_mkdir(SOURCE_ROOT)
 
 
-def isomer_list(source_root, dirslice):
+def isomer_list(source_root, dirslice, spiral_slice=None):
     for dir_path in os.listdir(source_root):
         if int(dir_path.split("_")[0][1:]) in dirslice:
-            yield dir_path
+            if spiral_slice:
+                if int(dir_path.split("_")[1][:9]) >= spiral_slice:
+                    yield dir_path
+            else:
+                yield dir_path
 
 
 class InteractionSubmission(Submission):
@@ -102,7 +109,7 @@ class InteractionSubmission(Submission):
         else:
             return True
 
-    def run_submission(self, *, exit_on_submit=False, clean=True, call_back=None, check_time_interval = 40):
+    def run_submission(self, *, exit_on_submit=False, clean=True, call_back=None, check_time_interval=40):
         """main method to execute the submission.
         First, check whether old Submission exists on the remote machine, and try to recover from it.
         Second, upload the local files to the remote machine where the tasks to be executed.
@@ -164,94 +171,95 @@ class InteractionSubmission(Submission):
         return self.serialize()
 
 
-WORK_BASE = "xyzdispatchertest/"
-tbar = tqdm.tqdm(desc="Batch Working Start")
-for isomer in isomer_list(SOURCE_ROOT, range(32, 60, 2)):
+if __name__ == '__main__':
 
-    task_list = []
+    WORK_BASE = "xyzdispatchertest/"
+    tbar = tqdm.tqdm(desc="Batch Working Start")
+    for isomer in isomer_list(SOURCE_ROOT, range(56, 60, 2), 664):
 
-    tbar.set_description(f"Batch begin on {isomer[:-5]}")
-    Source_dir = os.path.join(SOURCE_ROOT, isomer)
-    for idx, item in enumerate(recursion_files(Source_dir, format="xyz", ignore_mode=True)):
-        if idx < 20:
-            continue
-        tbar.reset(total=len(os.listdir(Source_dir)))
-        tbar.set_description(f"Batch Upload on {isomer[:-5]}")
+        task_list = []
 
-        file_base_name = os.path.basename(item)
-        file_name_without_ext = os.path.splitext(file_base_name)[0]
-        input_file_path = os.path.join(local_root, WORK_BASE, str(idx), file_base_name)
-        if not os.path.exists(input_file_path):
-            try:
-                os.mkdir(os.path.join(local_root, WORK_BASE, str(idx)))
-            except FileExistsError:
-                print("Not a clean `work_base`. Please Clean {}", file=sys.stderr)
-                exit(1)
-            shutil.copy(item, input_file_path)
-        test_TASK = Task(command=f"{xtb_path} {file_base_name} --opt tight --grad --json",
-                         task_work_path=f"{idx}/",
-                         forward_files=[file_base_name],
-                         backward_files=get_output_file_list(file_name_without_ext)
-                         )
-        task_list.append(test_TASK)
-        tbar.update()
+        tbar.set_description(f"Batch begin on {isomer[:-5]}")
+        Source_dir = os.path.join(SOURCE_ROOT, isomer)
+        for idx, item in enumerate(recursion_files(Source_dir, format="xyz", ignore_mode=True)):
+            tbar.reset(total=len(os.listdir(Source_dir)))
+            tbar.set_description(f"Batch Upload on {isomer[:-5]}")
 
-
-    def tbar_update_server_status(jobstatus):
-        tbar.reset(total=len(jobstatus))
-        cont_unsubmitted = 0
-        cont_waiting = 0
-        cont_running = 0
-        cont_terminated = 0
-        cont_finished = 0
-        cont_completing = 0
-        cont_unknown = 0
-        for stat in jobstatus:
-            if stat == JobStatus.unsubmitted:
-                cont_unsubmitted += 1
-            elif stat == JobStatus.waiting:
-                cont_waiting += 1
-            elif stat == JobStatus.running:
-                cont_running += 1
-            elif stat == JobStatus.terminated:
-                cont_terminated += 1
-            elif stat == JobStatus.finished:
-                cont_finished += 1
-            elif stat == JobStatus.completing:
-                cont_completing += 1
-            else:
-                cont_unknown += 1
-        tbar.update(cont_finished)
-        tbar.set_postfix(Status=f"Total Job: {len(jobstatus)}, Finished: {cont_finished}, Running: {cont_running}, UnSub:{cont_unsubmitted}, Wait:{cont_waiting}, T:{cont_terminated}, CG:{cont_completing}")
+            file_base_name = os.path.basename(item)
+            file_name_without_ext = os.path.splitext(file_base_name)[0]
+            input_file_path = os.path.join(local_root, WORK_BASE, str(idx), file_base_name)
+            if not os.path.exists(input_file_path):
+                try:
+                    os.mkdir(os.path.join(local_root, WORK_BASE, str(idx)))
+                except FileExistsError:
+                    print("Not a clean `work_base`. Please Clean {}", file=sys.stderr)
+                    exit(1)
+                shutil.copy(item, input_file_path)
+            test_TASK = Task(command=f"{xtb_path} {file_base_name} --opt tight --grad --json",
+                             task_work_path=f"{idx}/",
+                             forward_files=[file_base_name],
+                             backward_files=get_output_file_list(file_name_without_ext)
+                             )
+            task_list.append(test_TASK)
+            tbar.update()
 
 
-    submission = InteractionSubmission(work_base=WORK_BASE,
-                                       machine=machine,
-                                       resources=resources,
-                                       task_list=task_list,
-                                       forward_common_files=[],
-                                       backward_common_files=[]
-                                       )
-    submission.run_submission(call_back=tbar_update_server_status,check_time_interval=5)
-    tbar.reset()
-    tbar.set_postfix(Status="Running...")
+        def tbar_update_server_status(jobstatus):
+            tbar.reset(total=len(jobstatus))
+            cont_unsubmitted = 0
+            cont_waiting = 0
+            cont_running = 0
+            cont_terminated = 0
+            cont_finished = 0
+            cont_completing = 0
+            cont_unknown = 0
+            for stat in jobstatus:
+                if stat == JobStatus.unsubmitted:
+                    cont_unsubmitted += 1
+                elif stat == JobStatus.waiting:
+                    cont_waiting += 1
+                elif stat == JobStatus.running:
+                    cont_running += 1
+                elif stat == JobStatus.terminated:
+                    cont_terminated += 1
+                elif stat == JobStatus.finished:
+                    cont_finished += 1
+                elif stat == JobStatus.completing:
+                    cont_completing += 1
+                else:
+                    cont_unknown += 1
+            tbar.update(cont_finished)
+            tbar.set_postfix(Status=f"Total Job: {len(jobstatus)}, Finished: {cont_finished}, Running: {cont_running}, UnSub:{cont_unsubmitted}, Wait:{cont_waiting}, T:{cont_terminated}, CG:{cont_completing}",
+                             )
 
-    # working on calculated files
-    for idx, item in enumerate(recursion_files(Source_dir, format="xyz", ignore_mode=True)):
-        tbar.reset(total=len(os.listdir(Source_dir)))
-        tbar.set_description(f"Batch Copy on {isomer[:-5]}")
-        # copy files to origin directory.
-        file_base_name = os.path.basename(item)
-        file_name_without_ext = os.path.splitext(file_base_name)[0]
-        task_work_path = os.path.join(local_root, WORK_BASE, str(idx))
-        for outputfile, targetstorename in zip(get_output_file_list(file_name_without_ext), get_output_file_store_list(file_name_without_ext)):
-            outputfile = os.path.join(task_work_path, outputfile)
-            targetstorename = os.path.join(Source_dir, targetstorename)
-            shutil.move(outputfile, targetstorename)
-        shutil.rmtree(task_work_path)
-        tbar.update()
-    TASK_TABLE_FILE = open(TASK_TABLE, "a")
-    print(isomer, file=TASK_TABLE_FILE)
-    TASK_TABLE_FILE.close()
 
-tbar.close()
+        submission = InteractionSubmission(work_base=WORK_BASE,
+                                           machine=machine,
+                                           resources=resources,
+                                           task_list=task_list,
+                                           forward_common_files=[],
+                                           backward_common_files=[]
+                                           )
+        submission.run_submission(call_back=tbar_update_server_status, check_time_interval=5)
+        tbar.reset()
+        tbar.set_postfix(Status="Running...")
+
+        # working on calculated files
+        for idx, item in enumerate(recursion_files(Source_dir, format="xyz", ignore_mode=True)):
+            tbar.reset(total=len(os.listdir(Source_dir)))
+            tbar.set_description(f"Batch Copy on {isomer[:-5]}")
+            # copy files to origin directory.
+            file_base_name = os.path.basename(item)
+            file_name_without_ext = os.path.splitext(file_base_name)[0]
+            task_work_path = os.path.join(local_root, WORK_BASE, str(idx))
+            for outputfile, targetstorename in zip(get_output_file_list(file_name_without_ext), get_output_file_store_list(file_name_without_ext)):
+                outputfile = os.path.join(task_work_path, outputfile)
+                targetstorename = os.path.join(Source_dir, targetstorename)
+                shutil.move(outputfile, targetstorename)
+            shutil.rmtree(task_work_path)
+            tbar.update()
+        TASK_TABLE_FILE = open(TASK_TABLE, "a")
+        print(isomer, file=TASK_TABLE_FILE)
+        TASK_TABLE_FILE.close()
+
+    tbar.close()
