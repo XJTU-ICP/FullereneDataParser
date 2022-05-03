@@ -5,13 +5,12 @@
 # @File    : fullerene.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
-import warnings
 
-import matplotlib.pyplot as plt
 import networkx as nx
-from ase import Atoms
 import numpy as np
+from ase import Atoms
 from ase.neighborlist import natural_cutoffs, NeighborList
+
 from fullerenedatapraser.util.functools import lazy_property
 from fullerenedatapraser.util.logger import Logger
 
@@ -104,7 +103,7 @@ class FullereneFamily(Atoms):
 
         """
         # warnings.warn(f"This Function `get_fullerenecage` is still in progress")
-        return FullereneCage(spiral=self.spiral, nospiralflag=self.nospiralflag, atoms=self,atomADJ=self.atomADJ,circleADJ=self.circleADJ)
+        return FullereneCage(spiral=self.spiral, nospiralflag=self.nospiralflag, atoms=self, atomADJ=self.atomADJ, circleADJ=self.circleADJ)
 
 
 class FullereneCage(FullereneFamily):
@@ -132,7 +131,8 @@ class FullereneCage(FullereneFamily):
 
         Parameters
         ----------
-        deformation_ratio
+        sphere_ratio: sphere projection part of the result.
+        parr_ratio: parallel projection part of the result.
         path
         atom_label
         projection_circle_idx:int
@@ -145,17 +145,13 @@ class FullereneCage(FullereneFamily):
 
         """
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
-        ax,graph_pos=planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
-        return ax,graph_pos
+        ax, graph_pos = planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
+        return ax, graph_pos
 
 
 if __name__ == '__main__':
     import ase.build
-    from ase.visualize import view
-    from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
     import networkx as nx
-
-    nx.read_graph6
 
     # np.set_printoptions(threshold=np.inf)
     # np.set_printoptions(linewidth=500)

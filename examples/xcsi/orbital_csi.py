@@ -16,15 +16,15 @@ __doc__ = """
 """
 
 import pathlib
-import matplotlib.pyplot as plt
-import numpy as np
 from functools import partial
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
 from fullerenedatapraser.calculator.extend_csi import mp_store_csi, calculate_ext_csi
-from utils import charge_name_parse, charges_draw_parse, calculate_origin_csi, calculate_origin_csi_without_napp, calculate_origin_csi_only_napp, calculate_xcsi
+from utils import charge_name_parse, charges_draw_parse, calculate_xcsi
 
 plt.rcParams['font.sans-serif'] = "Arial"
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         """
     # =============== PART 1 ================ #
     1. Setup data source.
-    
+
     SPIRAL_ATOMS_ADJ_DIR:
         Directory storing output files of `spiral` program.
         As an example, file `C20` is:
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     >       <spiral ID> <PG> <Pentagon index> <NMR>
     >       <ADJ matrix, shape [20,20]>
     >       ...
-    
+
     SPIRAL_CIRCLE_ADJ_DIR:
         Directory storing output files of `spiral` program.
         As an example, file `C20` is:
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     >       <spiral ID> <PG> <Pentagon index> <NMR>
     >       <ADJ matrix of circles, shape [12,12]>
     >       ...
-    
+
     XYZ_STORE_PREFIX:
         Prefix name of Directory storing files of C<2N> coordinates particularly.
         Directory structure should be:
@@ -59,16 +59,16 @@ if __name__ == '__main__':
             | ...
             |-C24
             |...
-        
+
         These .xyz files have energy calculated by `xTB`.
         As an example, file `C20_000000001opt.xyz` is:
     >   20
     >    energy: -42.0890 <info>
     >   C  <xyz coordinates>
     >   ...
-    
+
     CSI_NPY_STORE_PREFIX:
-        Prefix name of Directory storing files of C<2N>  particularly.    
+        Prefix name of Directory storing files of C<2N>  particularly.
         See `numpy.load()` and `numpy.savez()` for details.
         Each `.npz` file have three `numpy.array()` named:
         ['csi_list', 'spiral_num', 'energy', 'napp']
@@ -76,7 +76,7 @@ if __name__ == '__main__':
             |-C20_CSI.npz
             |-C24_CSI.npz
             |...
-    
+
     # =============== PART 1 ================ #
     """
     DIS_CUT = None
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # =============== PART 2 ================ #
     2. Calculate if needed.
     Set `_recalculate` = `True` if force to recalculate all data.
-    
+
     # =============== PART 2 ================ #
     """
     _recalculate = False  # set to True to recalculate all
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         """
     # =============== PART 3 ================ #
     3. Calculate if needed.
-    
+
 
     # =============== PART 2 ================ #
     """
@@ -187,5 +187,5 @@ if __name__ == '__main__':
         })
         g = sns.scatterplot(data=data, x="xcsilist_only_xcsi", y="enlist", hue="charge")
         g.set_xlabel("XCSI")
-        g.set_ylabel("$E_\mathrm{r}$/eV")
+        g.set_ylabel("$E_\\mathrm{r}$/eV")
 plt.show()
