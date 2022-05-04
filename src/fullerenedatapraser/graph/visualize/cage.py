@@ -51,7 +51,7 @@ def planarity_graph_draw(cage: FullereneCage,
 
     # TODO: Group Point method.
     if 1:
-        circles = cage.circle_vertex_list()
+        circles = cage.circle_vertex_list
         projection_point_flag = 0
         circle_from = None
         for circle in circles:
