@@ -44,14 +44,14 @@ def planarity_graph_draw(cage: FullereneCage,
 
     """
     center_full = np.average(cage.positions, axis=0)  # molecular geom-center
-    cage.positions = cage.positions-center_full
+    centered_pos = cage.positions-center_full
     # projection on a sphere to avoid extrem deformation of shell
-    diameter_full = max(np.linalg.norm(cage.positions - center_full, axis=1))  # diameter of sphere to project first time
-    pos_sphere = center_full + (cage.positions - center_full) / np.linalg.norm(cage.positions - center_full, axis=1)[:, None] * diameter_full
+    diameter_full = max(np.linalg.norm(centered_pos, axis=1))  # diameter of sphere to project first time
+    pos_sphere = (centered_pos) / np.linalg.norm(centered_pos, axis=1)[:, None] * diameter_full
 
     # TODO: Group Point method.
     if 1:
-        circles = cage.circle_vertex_list()
+        circles = cage.circle_vertex_list
         projection_point_flag = 0
         circle_from = None
         for circle in circles:
@@ -72,10 +72,10 @@ def planarity_graph_draw(cage: FullereneCage,
         if circle_from is None:
             if projection_point>=0:
                 raise RuntimeError("No Pentagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
-        radius = np.average(np.linalg.norm(pos_sphere[circle_from] - center_full, axis=1))
+        radius = np.average(np.linalg.norm(pos_sphere[circle_from], axis=1))
 
-    center_circle = np.average(cage.positions[circle_from], axis=0)
-    project_direct = (center_circle - center_full) / np.linalg.norm((center_circle - center_full))
+    center_circle = np.average(centered_pos[circle_from], axis=0)
+    project_direct = (center_circle) / np.linalg.norm((center_circle))
     center_circle = project_direct * radius
 
     # get the projection
