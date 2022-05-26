@@ -86,7 +86,9 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path):
         energy = f.info["energy"]
         fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
         spiral_num_list.append(spiral_num)
-        csi_list.append(calculate_csi(fuller)[0])
+        csi_val, _, napp_val = calculate_csi(fuller)
+        csi_list.append(csi_val)
+        napp_list.append(napp_val)
         energy_list.append(energy)
     np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list), napp=napp_list)
 
