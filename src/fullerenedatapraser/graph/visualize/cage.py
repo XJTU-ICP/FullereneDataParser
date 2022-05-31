@@ -44,10 +44,12 @@ def planarity_graph_draw(cage: FullereneCage,
 
     """
     center_full = np.average(cage.positions, axis=0)  # molecular geom-center
-    centered_pos = cage.positions-center_full
+    centered_pos = cage.positions - center_full
     # projection on a sphere to avoid extrem deformation of shell
-    diameter_full = max(np.linalg.norm(centered_pos, axis=1))  # diameter of sphere to project first time
-    pos_sphere = (centered_pos) / np.linalg.norm(centered_pos, axis=1)[:, None] * diameter_full
+    diameter_full = max(np.linalg.norm(centered_pos,
+                                       axis=1))  # diameter of sphere to project first time
+    pos_sphere = (centered_pos) / np.linalg.norm(centered_pos, axis=1)[:,
+                                  None] * diameter_full
 
     # TODO: Group Point method.
     if 1:
@@ -55,23 +57,24 @@ def planarity_graph_draw(cage: FullereneCage,
         projection_point_flag = 0
         circle_from = None
         for circle in circles:
-            if projection_point>=0:
+            if projection_point >= 0:
                 if len(circle) == 6:
                     if projection_point_flag == projection_point:
-                        circle_from=circle
+                        circle_from = circle
                         break
                     else:
-                        projection_point_flag+=1
+                        projection_point_flag += 1
             else:
                 if len(circle) == 5:
-                    if projection_point_flag-1 == projection_point:
-                        circle_from=circle
+                    if projection_point_flag - 1 == projection_point:
+                        circle_from = circle
                         break
                     else:
-                        projection_point_flag-=1
+                        projection_point_flag -= 1
         if circle_from is None:
-            if projection_point>=0:
-                raise RuntimeError("No Pentagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
+            if projection_point >= 0:
+                raise RuntimeError(
+                    "No Pentagon found. Please Implement `projection_point` for `planarity_graph_draw` or `projection_circle_idx` for `draw` with `int`<0")
         radius = np.average(np.linalg.norm(pos_sphere[circle_from], axis=1))
 
     center_circle = np.average(centered_pos[circle_from], axis=0)
@@ -80,12 +83,16 @@ def planarity_graph_draw(cage: FullereneCage,
 
     # get the projection
     pro_radius = max(np.linalg.norm(pos_sphere - center_circle, axis=1))
-    project_axis_s = hemisphere_projection_graph(pro_radius, pos_sphere, projection_from=center_circle)
+    project_axis_s = hemisphere_projection_graph(pro_radius, pos_sphere,
+                                                 projection_from=center_circle)
 
-    project_axis_p = parrallel_projection_graph(pro_radius, pos_sphere, projection_from=center_circle, project_direct_parrallel=project_direct)
+    project_axis_p = parrallel_projection_graph(pro_radius, pos_sphere,
+                                                projection_from=center_circle,
+                                                project_direct_parrallel=project_direct)
 
     # projection from hemisphere to platform
-    pro_t = (-project_direct * project_axis_s).sum(-1) - pro_radius - (-project_direct * center_circle).sum(-1)
+    pro_t = (-project_direct * project_axis_s).sum(-1) - pro_radius - (
+            -project_direct * center_circle).sum(-1)
     project_axis_sp = project_axis_s - pro_t[:, None] * -project_direct
     project_axis_sp = (sphere_ratio * project_axis_sp + parr_ratio * project_axis_p) / 2
 
@@ -97,6 +104,20 @@ def planarity_graph_draw(cage: FullereneCage,
                            [mx, my, mz]])
     project_axis_sp_r = np.einsum("an,mn->am", project_axis_sp, mat_rotate)
 
+    # make sure a parallel top edge
+    mx = project_axis_sp_r[:, 0]
+    my = project_axis_sp_r[:, 1]
+    mz = project_axis_sp_r[:, 2]
+    sorted = np.sort(project_axis_sp_r[:,1])
+    originxyz1 = project_axis_sp_r[project_axis_sp_r[:,1]==sorted[-1]]
+    originxyz2 = project_axis_sp_r[project_axis_sp_r[:,1]==sorted[-2]]
+    topedge = originxyz2[:,:2]-originxyz1[:,:2]
+    toporient = topedge/np.linalg.norm(topedge)
+    topsin = float(toporient[:,0])
+    topcos = float(toporient[:,1])
+    mat_rotate = np.array([[-topsin,-topcos],[topcos,-topsin]])
+    project_axis_sp_r[:,:2] = np.einsum("an,nm->am",mat_rotate,np.array([mx,my])).transpose()
+
     # draw figure
     fig = plt.figure(figsize=[10, 10])
     ax = fig.add_subplot(111)
@@ -105,24 +126,37 @@ def planarity_graph_draw(cage: FullereneCage,
     # draw circle and circle fills
     for circleone in circles:
         if len(circleone) == 5:
-            xy = [project_axis_sp_r[circleone][:, 0], project_axis_sp_r[circleone][:, 1]]
-            ax.add_patch(mpatches.Polygon(np.array(xy).transpose(), color=pentage_color, antialiased=antialiased, alpha=pentage_alpha))
+            xy = [project_axis_sp_r[circleone][:, 0],
+                  project_axis_sp_r[circleone][:, 1]]
+            ax.add_patch(mpatches.Polygon(np.array(xy).transpose(), color=pentage_color,
+                                          antialiased=antialiased, alpha=pentage_alpha))
 
     # draw atoms
     if atom_label:
-        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color, alpha=line_alpha, s=150)
+        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color,
+                   alpha=line_alpha, s=150)
         for i in range(cage.natoms):
-            ax.text(project_axis_sp_r[:, 0][i], project_axis_sp_r[:, 1][i], str(i + 1), fontsize=10,
+            ax.text(project_axis_sp_r[:, 0][i], project_axis_sp_r[:, 1][i], str(i + 1),
+                    fontsize=10,
                     horizontalalignment='center',
                     verticalalignment='center', )
             pass
         # draw edge lines
         for edges in cage.graph.edges:
-            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]], project_axis_sp_r[edges[1]], antialiased=antialiased, alpha=line_alpha, shrinkA=7, shrinkB=7))
+            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]],
+                                                  project_axis_sp_r[edges[1]],
+                                                  antialiased=antialiased,
+                                                  alpha=line_alpha, shrinkA=7,
+                                                  shrinkB=7))
     else:
-        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color, alpha=line_alpha)
+        ax.scatter(project_axis_sp_r[:, 0], project_axis_sp_r[:, 1], c=line_color,
+                   alpha=line_alpha)
         for edges in cage.graph.edges:
-            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]], project_axis_sp_r[edges[1]], antialiased=antialiased, alpha=line_alpha, shrinkA=5, shrinkB=5))
+            ax.add_patch(mpatches.FancyArrowPatch(project_axis_sp_r[edges[0]],
+                                                  project_axis_sp_r[edges[1]],
+                                                  antialiased=antialiased,
+                                                  alpha=line_alpha, shrinkA=5,
+                                                  shrinkB=5))
 
     # set the figure
     plt.axis("equal")
@@ -134,7 +168,8 @@ def planarity_graph_draw(cage: FullereneCage,
         pass
     else:
         fig.savefig(path)
-    return ax,project_axis_sp_r
+    return ax, project_axis_sp_r
+
 
 def hemisphere_projection_graph(pro_radius, pos_sphere, projection_from):
     """
@@ -158,7 +193,8 @@ def hemisphere_projection_graph(pro_radius, pos_sphere, projection_from):
     return project_axis_s
 
 
-def parrallel_projection_graph(pro_radius, pos_sphere, projection_from, project_direct_parrallel=np.array([0, 0, 0])):
+def parrallel_projection_graph(pro_radius, pos_sphere, projection_from,
+                               project_direct_parrallel=np.array([0, 0, 0])):
     """
     Get projection axis using hemisphere method.
     Parameters

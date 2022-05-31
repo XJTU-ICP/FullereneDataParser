@@ -19,8 +19,6 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sklearn.decomposition import PCA
-
 from fullerenedatapraser.calculator.csi import mp_store_csi
 from utils import charge_name_parse, charges_draw_parse, calculate_origin_csi, calculate_origin_csi_without_napp, calculate_origin_csi_only_napp
 
