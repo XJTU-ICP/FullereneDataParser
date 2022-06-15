@@ -37,7 +37,7 @@ def matrix2spiral_slow(input_path, circle_num, eigh_ref):
     if input_path.suffix == ".gjf":
         g_in = read_gaussian_in(open(input_path, "r"))
     elif input_path.suffix == ".xyz":
-        atomlist = list(simple_read_xyz_xtb(input_path.as_posix()))
+        atomlist = list(simple_read_xyz_xtb(input_path.as_posix(), read_comment=False))
         if len(atomlist) == 1:
             g_in = atomlist[0]
         else:
