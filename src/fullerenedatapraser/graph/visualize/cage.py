@@ -22,7 +22,8 @@ def planarity_graph_draw(cage: FullereneCage,
                          antialiased=True,
                          line_color="orange",
                          line_alpha=0.5,
-                         atom_label=True):
+                         atom_label=True,
+                         ax=None):
     """
     Draw fullerene planarity graph combinating parrallel and hemi-sphere projection.
 
@@ -119,9 +120,10 @@ def planarity_graph_draw(cage: FullereneCage,
     project_axis_sp_r[:,:2] = np.einsum("an,nm->am",mat_rotate,np.array([mx,my])).transpose()
 
     # draw figure
-    fig = plt.figure(figsize=[10, 10])
-    ax = fig.add_subplot(111)
-    # ax.scatter(project_axis_p[:, 0], project_axis_p[:, 1], project_axis_p[:, 2])
+    if ax is None:
+        fig = plt.figure(figsize=[10, 10])
+        ax = fig.add_subplot(111)
+        # ax.scatter(project_axis_p[:, 0], project_axis_p[:, 1], project_axis_p[:, 2])
 
     # draw circle and circle fills
     for circleone in circles:

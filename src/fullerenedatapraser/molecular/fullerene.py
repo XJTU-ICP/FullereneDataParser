@@ -127,7 +127,7 @@ class FullereneCage(FullereneFamily):
     def circle_vertex_list(self) -> Iterable[np.ndarray]:
         return self.circle_finder.get_face_vertex_list()
 
-    def draw(self, sphere_ratio=0.2, parr_ratio=0.8, path=None, atom_label=True, projection_circle_idx=0):
+    def draw(self, sphere_ratio=0.2, parr_ratio=0.8, path=None, atom_label=True, projection_circle_idx=0,ax=None):
         """
 
         Parameters
@@ -141,12 +141,14 @@ class FullereneCage(FullereneFamily):
                 project from hexagon,
             if projection_circle_idx<0：
                 project from pentagon
+        ax: matplotlib axes
+            if None, use new axes.
         Returns
         -------
 
         """
         from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
-        ax, graph_pos = planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx)
+        ax, graph_pos = planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx,ax=ax)
         return ax, graph_pos
 
 
