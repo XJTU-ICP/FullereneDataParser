@@ -5,6 +5,7 @@
 # @File    : fullerene.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
+import logging
 from typing import Iterable
 
 import networkx as nx
@@ -19,7 +20,14 @@ logger = Logger(__name__, console_on=True)
 
 
 class FullereneFamily(Atoms):
-    def __init__(self, spiral, nospiralflag=False, atomADJ=None, circleADJ=None, **kwargs):
+    def __init__(
+        self,
+        spiral,
+        nospiralflag=False,
+        atomADJ=None,
+        circleADJ=None,
+        **kwargs,
+    ):
         """
 
         Parameters
@@ -81,7 +89,15 @@ class FullereneFamily(Atoms):
         cutoffs = natural_cutoffs(self)
         neighborList = NeighborList(cutoffs, self_interaction=False, bothways=True)
         neighborList.update(self)
-        return neighborList.get_connectivity_matrix(sparse=False)
+        atomADJ = neighborList.get_connectivity_matrix(sparse=False)
+        if (atomADJ.sum(-1) != 3).any():
+            atomADJ = np.zeros_like(atomADJ)
+            logging.warning(f"More than 3 neighbors by ase found for {self.spiral}."
+                            f"Trying using first 3 shortest distance.")
+            neighborDis: np.ndarray = self.get_all_distances()
+            neighborSorted = np.argsort(neighborDis)
+            atomADJ[np.arange(self.natoms)[:, None], neighborSorted[:, 1:4]] = 1
+        return atomADJ
 
     @lazy_property
     def calculated_circleADJ(self):
