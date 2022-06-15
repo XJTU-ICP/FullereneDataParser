@@ -5,6 +5,7 @@
 # @File    : matrix2spiral.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
+import pathlib
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,17 +13,18 @@ from ase.io.gaussian import read_gaussian_in
 from tqdm import tqdm
 
 from fullerenedatapraser.molecular.fullerene import FullereneCage
+from src.fullerenedatapraser.io.xyz import simple_read_xyz_xtb
 
 
 # slow method
-def matrix2spiral_slow(gjf_path, circle_num, eigh_ref):
+def matrix2spiral_slow(input_path, circle_num, eigh_ref):
     """
     Search spiral of an offering .gjf file from circle adj database.
     Print on screen.
 
     Parameters
     ----------
-    gjf_path
+    input_path: xyz or gjf file path string.
     circle_num: !!! the number of circle
     eigh_ref: list
         list store the eigh values by np.linalg.eigh()
@@ -31,9 +33,20 @@ def matrix2spiral_slow(gjf_path, circle_num, eigh_ref):
     -------
 
     """
-    g_in = read_gaussian_in(open(gjf_path, "r"))
+    input_path = pathlib.Path(input_path)
+    if input_path.suffix == ".gjf":
+        g_in = read_gaussian_in(open(input_path, "r"))
+    elif input_path.suffix == ".xyz":
+        atomlist = list(simple_read_xyz_xtb(input_path.as_posix()))
+        if len(atomlist) == 1:
+            g_in = atomlist[0]
+        else:
+            raise ValueError(
+                f"There are more than one atoms in file {input_path.name}. Please check.")
+    else:
+        raise ValueError(f"Unrecognizable extension name {input_path.suffix}.")
     cage = FullereneCage(spiral=-1, atoms=g_in)
-    assert g_in.get_atomic_numbers() == (circle_num - 2) * 2
+    assert g_in.get_global_number_of_atoms() == (circle_num - 2) * 2
     circle_adj = np.zeros([circle_num, circle_num])
     circle_edge = np.array(cage.circle_finder.get_dual_edge_list())
     circle_adj[circle_edge[:, 0], circle_edge[:, 1]] = 1
@@ -41,7 +54,7 @@ def matrix2spiral_slow(gjf_path, circle_num, eigh_ref):
     w, v = np.linalg.eigh(circle_adj)
     for idx, item in tqdm(enumerate(eigh_ref, 1)):
         if np.allclose(item, w):
-            print(f"Seem like spiral = {idx}")
+            print(f"Seem like spiral = {idx} for file {pathlib.Path(input_path).name}.")
 
 
 if __name__ == '__main__':
