@@ -58,6 +58,7 @@ def calculate_origin_csi(eval, napp, charged):
 
     """
     atomnum = eval.shape[-1]
+    assert (np.sort(eval)==eval).all()
     evalsum = 0
     if charged > 0:
         evalsum = -eval[:, atomnum // 2 + 1:atomnum // 2 + 1 + charged // 2].sum(-1)
