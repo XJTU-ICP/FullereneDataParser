@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from ase.units import eV, kcal, mol
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 try:

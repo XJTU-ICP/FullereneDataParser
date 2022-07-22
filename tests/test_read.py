@@ -1,9 +1,9 @@
 import os
 
 import pytest
-from fullerenedatapraser.io import FileCommentError
-from fullerenedatapraser.io.g16log import read_g16log_atoms, LogFile
-from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
+from fullerenedataparser.io import FileCommentError
+from fullerenedataparser.io.g16log import read_g16log_atoms, LogFile
+from fullerenedataparser.io.xyz import simple_read_xyz_xtb
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"

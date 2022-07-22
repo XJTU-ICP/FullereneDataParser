@@ -7,8 +7,8 @@
 # ====================================== #
 
 from ase.atoms import Atoms
-from fullerenedatapraser.io import FileCommentError
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.io import FileCommentError
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 

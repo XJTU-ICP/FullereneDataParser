@@ -99,8 +99,8 @@ def get_vertex_class_lists(ADJ,mask:list,order=None):
 if __name__ == '__main__':
     # import ase.build
     # import numpy as np
-    from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
-    from fullerenedatapraser.molecular.fullerene import FullereneFamily
+    from fullerenedataparser.io.xyz import simple_read_xyz_xtb
+    from fullerenedataparser.molecular.fullerene import FullereneFamily
     from ase.visualize import view
     import os
 

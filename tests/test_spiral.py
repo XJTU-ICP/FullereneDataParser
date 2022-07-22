@@ -2,7 +2,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from fullerenedatapraser.data.spiral import read_spiral_output
+from fullerenedataparser.data.spiral import read_spiral_output
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"

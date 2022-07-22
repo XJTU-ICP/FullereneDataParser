@@ -19,14 +19,14 @@ from multiprocessing import Pool, RLock, freeze_support
 import pathlib
 
 import numpy as np
-from fullerenedatapraser.data.spiral import adj_gener
-from fullerenedatapraser.io.recursion import recursion_files
-from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
-from fullerenedatapraser.molecular.fullerene import FullereneFamily
-from fullerenedatapraser.util.config import setGlobValue
-from fullerenedatapraser.util.logger import Logger
-from fullerenedatapraser.util.mp import print_error
-from fullerenedatapraser.util.geometry import sphere_center_of_four_points
+from fullerenedataparser.data.spiral import adj_gener
+from fullerenedataparser.io.recursion import recursion_files
+from fullerenedataparser.io.xyz import simple_read_xyz_xtb
+from fullerenedataparser.molecular.fullerene import FullereneFamily
+from fullerenedataparser.util.config import setGlobValue
+from fullerenedataparser.util.logger import Logger
+from fullerenedataparser.util.mp import print_error
+from fullerenedataparser.util.geometry import sphere_center_of_four_points
 from tqdm import tqdm
 
 setGlobValue("log_level", logging.DEBUG)

@@ -9,8 +9,8 @@
 import os
 from pathlib import Path
 
-from fullerenedatapraser.io import FileNotMatchError
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.io import FileNotMatchError
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 

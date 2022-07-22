@@ -12,10 +12,10 @@ import networkx as nx
 import numpy as np
 import tqdm
 from ase.atoms import Atoms
-from fullerenedatapraser.graph.algorithm import dual
-from fullerenedatapraser.io.recursion import recursion_files
-from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
-from fullerenedatapraser.molecular.fullerene import FullereneFamily
+from fullerenedataparser.graph.algorithm import dual
+from fullerenedataparser.io.recursion import recursion_files
+from fullerenedataparser.io.xyz import simple_read_xyz_xtb
+from fullerenedataparser.molecular.fullerene import FullereneFamily
 
 
 # script to generate C2 addition patterns.

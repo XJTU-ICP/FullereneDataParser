@@ -2,14 +2,10 @@
 # ====================================== #
 # @Author  : Yanbo Han
 # @Email   : yanbohan98@gmail.com
-# @File    : mp.py
+# @File    : io.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
-
-
-def print_error(value):
-    logger.error(f"Wrong when using process pool: {value}")

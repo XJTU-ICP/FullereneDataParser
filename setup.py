@@ -24,7 +24,7 @@ if __name__ == "__main__":
         import numpy
 
         extensions = [  # *find_pyx()
-            Extension("fullerenedatapraser.graph.algorithm.dual", ["src/fullerenedatapraser/graph/algorithm/dual" + ext],
+            Extension("fullerenedataparser.graph.algorithm.dual", ["src/fullerenedataparser/graph/algorithm/dual" + ext],
                       include_dirs=[numpy.get_include(), "e3rdpackage/boost"],
                       language="c++",
                       # libraries=[],

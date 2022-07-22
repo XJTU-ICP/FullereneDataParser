@@ -19,7 +19,7 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from fullerenedatapraser.calculator.csi import mp_store_csi
+from fullerenedataparser.calculator.csi import mp_store_csi
 from utils import charge_name_parse, charges_draw_parse, calculate_origin_csi, calculate_origin_csi_without_napp, calculate_origin_csi_only_napp
 
 if __name__ == '__main__':

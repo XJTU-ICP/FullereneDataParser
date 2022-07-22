@@ -11,8 +11,8 @@ import re
 
 import numpy as np
 from ase.atoms import Atoms
-from fullerenedatapraser.util.functools import lazy_property
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.functools import lazy_property
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 

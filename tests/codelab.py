@@ -9,8 +9,8 @@
 import os
 from multiprocessing import Pool
 
-from fullerenedatapraser.data.spiral import adj_gener
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.data.spiral import adj_gener
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 
@@ -21,8 +21,8 @@ def work(atomfile, circlefile, targetfile):
 
 
 if __name__ == '__main__':
-    from fullerenedatapraser.data.spiral import adj_store
-    from fullerenedatapraser.io.recursion import recursion_files
+    from fullerenedataparser.data.spiral import adj_store
+    from fullerenedataparser.io.recursion import recursion_files
     from multiprocessing import cpu_count
 
     atomdir = r"C:\Work\CODE\DATA\bin"

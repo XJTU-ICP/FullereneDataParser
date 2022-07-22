@@ -6,14 +6,14 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
-from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
+from fullerenedataparser.graph.visualize.cage import planarity_graph_draw
 import matplotlib.colors
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from ase.build import molecule
 
-from fullerenedatapraser.molecular.fullerene import FullereneCage
+from fullerenedataparser.molecular.fullerene import FullereneCage
 
 C60 = molecule("C60")
 f = FullereneCage(atoms=C60, spiral=1812)

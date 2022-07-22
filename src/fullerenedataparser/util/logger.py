@@ -8,7 +8,7 @@
 
 import logging
 
-from fullerenedatapraser.util.config import getGlobValue
+from fullerenedataparser.util.config import getGlobValue
 
 __all__ = [
     "InfoLogger", "Logger"
@@ -165,7 +165,7 @@ Logger = getLogger(level=getGlobValue("log_level"))
 
 # TODO: Delete Me.
 # if __name__ == '__main__':
-#     from fullerenedatapraser.util.config import setGlobValue
+#     from fullerenedataparser.util.config import setGlobValue
 #
 #     setGlobValue("log_level", logging.DEBUG)
 #     # print(getGlobValue("log_level"))

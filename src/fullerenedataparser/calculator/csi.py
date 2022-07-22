@@ -12,12 +12,12 @@ import re
 from multiprocessing import Pool, RLock, freeze_support
 
 import numpy as np
-from fullerenedatapraser.data.spiral import adj_gener
-from fullerenedatapraser.io.recursion import recursion_files
-from fullerenedatapraser.io.xyz import simple_read_xyz_xtb
-from fullerenedatapraser.molecular.fullerene import FullereneFamily
-from fullerenedatapraser.util.logger import Logger
-from fullerenedatapraser.util.mp import print_error
+from fullerenedataparser.data.spiral import adj_gener
+from fullerenedataparser.io.recursion import recursion_files
+from fullerenedataparser.io.xyz import simple_read_xyz_xtb
+from fullerenedataparser.molecular.fullerene import FullereneFamily
+from fullerenedataparser.util.logger import Logger
+from fullerenedataparser.util.mp import print_error
 from tqdm import tqdm
 
 logger = Logger(__name__, console_on=True)

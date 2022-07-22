@@ -13,8 +13,8 @@ import numpy as np
 from ase import Atoms
 from ase.neighborlist import natural_cutoffs, NeighborList
 
-from fullerenedatapraser.util.functools import lazy_property
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.functools import lazy_property
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 
@@ -136,7 +136,7 @@ class FullereneCage(FullereneFamily):
 
     @lazy_property
     def circle_finder(self):
-        from fullerenedatapraser.graph.algorithm import dual
+        from fullerenedataparser.graph.algorithm import dual
         return dual.py_graph_circle_finder(len(self.graph.edges), np.array(self.graph.edges).data)
 
     @lazy_property
@@ -163,7 +163,7 @@ class FullereneCage(FullereneFamily):
         -------
 
         """
-        from fullerenedatapraser.graph.visualize.cage import planarity_graph_draw
+        from fullerenedataparser.graph.visualize.cage import planarity_graph_draw
         ax, graph_pos = planarity_graph_draw(self, sphere_ratio=sphere_ratio, parr_ratio=parr_ratio, path=path, atom_label=atom_label, projection_point=projection_circle_idx,ax=ax)
         return ax, graph_pos
 

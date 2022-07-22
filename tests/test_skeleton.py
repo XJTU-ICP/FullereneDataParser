@@ -37,5 +37,5 @@ def test_cli():
 #
 #
 # def test_main_python():
-#     res = os.popen("python -m fullerenedatapraser.skeleton 7")
+#     res = os.popen("python -m fullerenedataparser.skeleton 7")
 #     assert "The 7-th Fibonacci number is 13" in res.read()

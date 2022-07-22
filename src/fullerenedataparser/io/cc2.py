@@ -6,6 +6,6 @@
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)

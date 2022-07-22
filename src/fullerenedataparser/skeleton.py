@@ -4,7 +4,7 @@ console script. To run this script uncomment the following lines in the
 ``[options.entry_points]`` section in ``setup.cfg``::
 
     console_scripts =
-         fibonacci = fullerenedatapraser.skeleton:run
+         fibonacci = fullerenedataparser.skeleton:run
 
 Then run ``pip install .`` (or ``pip install -e .`` for editable mode)
 which will install the command ``fibonacci`` inside your current environment.
@@ -35,8 +35,8 @@ except ModuleNotFoundError:
             logger.warning("Please install module `deprecation` by `conda install deprecation -c conda-forge.`")
             sys.exit(1)
 
-from fullerenedatapraser.calculator.csi import mp_store_csi
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.calculator.csi import mp_store_csi
+from fullerenedataparser.util.logger import Logger
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"
@@ -48,7 +48,7 @@ logger = Logger(__name__, console_on=True)
 # ---- Python API ----
 # The functions defined in this section can be imported by users in their
 # Python scripts/interactive interpreter, e.g. via
-# `from fullerenedatapraser.skeleton import fib`,
+# `from fullerenedataparser.skeleton import fib`,
 # when using this Python module as a library.
 
 
@@ -82,7 +82,7 @@ def fullertool(verbose):
     By MIT License.(2021-)\n
     Use `-v` and `-vv` to set log level.
     """
-    from fullerenedatapraser.util.config import setGlobValue
+    from fullerenedataparser.util.config import setGlobValue
     if 2 > verbose > 0:
         setGlobValue("log_level", logging.INFO)
         logger.setLevel(logging.INFO)

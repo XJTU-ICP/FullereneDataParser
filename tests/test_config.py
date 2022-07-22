@@ -1,7 +1,7 @@
 import pytest
 
 # Inmport Some packages
-from fullerenedatapraser.util.config import GlobalVar, setGlobValue, getGlobValue, SetModuleEnvValue
+from fullerenedataparser.util.config import GlobalVar, setGlobValue, getGlobValue, SetModuleEnvValue
 import logging
 
 __author__ = "hanyanbo"

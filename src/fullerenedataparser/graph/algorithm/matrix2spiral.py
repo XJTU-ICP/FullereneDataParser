@@ -12,8 +12,8 @@ import numpy as np
 from ase.io.gaussian import read_gaussian_in
 from tqdm import tqdm
 
-from fullerenedatapraser.molecular.fullerene import FullereneCage
-from src.fullerenedatapraser.io.xyz import simple_read_xyz_xtb
+from fullerenedataparser.molecular.fullerene import FullereneCage
+from src.fullerenedataparser.io.xyz import simple_read_xyz_xtb
 
 
 # slow method

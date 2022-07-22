@@ -15,7 +15,7 @@ import dpdispatcher
 import tqdm
 from dpdispatcher import Machine, Resources, Task, Submission, dlog
 from dpdispatcher.JobStatus import JobStatus
-from fullerenedatapraser.io.recursion import recursion_files
+from fullerenedataparser.io.recursion import recursion_files
 
 dpdispatcher.dlog.handlers = [dpdispatcher.dlog.handlers[0]]
 

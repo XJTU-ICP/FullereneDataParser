@@ -16,9 +16,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from fullerenedatapraser.io.recursion import recursion_files
-from fullerenedatapraser.util.logger import Logger
-from fullerenedatapraser.util.mp import print_error
+from fullerenedataparser.io.recursion import recursion_files
+from fullerenedataparser.util.logger import Logger
+from fullerenedataparser.util.mp import print_error
 
 logger = Logger(__name__, console_on=True)
 

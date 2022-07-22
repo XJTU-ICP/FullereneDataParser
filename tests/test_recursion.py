@@ -3,9 +3,9 @@ import os
 from pathlib import Path
 
 import pytest
-from fullerenedatapraser.io import FileNotMatchError
-from fullerenedatapraser.io.recursion import recursion_files
-from fullerenedatapraser.util.config import SetModuleEnvValue
+from fullerenedataparser.io import FileNotMatchError
+from fullerenedataparser.io.recursion import recursion_files
+from fullerenedataparser.util.config import SetModuleEnvValue
 
 __author__ = "hanyanbo"
 __copyright__ = "hanyanbo"

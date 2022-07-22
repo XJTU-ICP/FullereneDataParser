@@ -9,7 +9,7 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-from fullerenedatapraser.molecular.fullerene import FullereneCage
+from fullerenedataparser.molecular.fullerene import FullereneCage
 
 
 def planarity_graph_draw(cage: FullereneCage,

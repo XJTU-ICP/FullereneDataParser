@@ -10,7 +10,7 @@ from typing import Generator
 
 import ase
 from ase import Atoms
-from fullerenedatapraser.util.logger import Logger
+from fullerenedataparser.util.logger import Logger
 
 logger = Logger(__name__, console_on=True)
 
