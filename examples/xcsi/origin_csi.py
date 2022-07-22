@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
     _pass = True
 
-    number_mask = range(20, 62)
+    number_mask = range(42, 44)
     # Set to None if not need mask
 
     if not _pass:
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     # =============== PART 2 ================ #
     """
-    draw_list = range(60, 62, 2)
+    draw_list = range(42, 44, 2)
     draw_rc = np.array(list((map(charges_draw_parse, charged_list))))
 
     for N in draw_list:
@@ -156,7 +156,8 @@ if __name__ == '__main__':
             csilist = calculate_origin_csi(csi_value, napp_value, charge)
             evallist = calculate_origin_csi_without_napp(csi_value, napp_value, charge)
             enlist = [item - min_en for item in energy_value]
+            # np.savez(f"output/CSI_C{N}{charge_in_name}.npz",csilist=csi_value,enlist=enlist,napplist=napplist)
             ax[pltidx[0], pltidx[1]].scatter(csilist, enlist, marker="x")
-            print(charge, np.corrcoef(np.array([napplist, csilist, evallist, enlist])))
+            print(N, charge, np.corrcoef(np.array([napplist, csilist, evallist, enlist])))
 
 plt.show()

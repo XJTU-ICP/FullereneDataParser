@@ -2,7 +2,7 @@
 # ====================================== #
 # @Author  : Yanbo Han
 # @Email   : yanbohan98@gmail.com
-# @File    : origin_csi.py
+# @File    : origin_csi_neighbors.py
 # ALL RIGHTS ARE RESERVED UNLESS STATED.
 # ====================================== #
 
@@ -16,17 +16,77 @@ __doc__ = """
 """
 
 import pathlib
-from functools import partial
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from fullerenedatapraser.calculator.extend_csi import mp_store_csi, calculate_ext_csi
+from fullerenedatapraser.calculator.extend_csi import mp_store_csi
+from fullerenedatapraser.molecular.fullerene import FullereneFamily
+from fullerenedatapraser.util.geometry import sphere_center_of_four_points
 from utils import charge_name_parse, charges_draw_parse, calculate_xcsi
 
 plt.rcParams['font.sans-serif'] = "Arial"
+
+
+def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
+    """
+    Implemention of extended
+    Parameters
+    ----------
+    fullerene:FullereneFamily
+        molecule Instance of Fullerene.
+    para:int
+        multiple value to adj
+    distance_cutoff: float or None
+        distance more than cutoff will be regard as 0
+    Returns
+    -------
+        CSI
+    References
+    ----------
+
+    """
+
+    assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
+    assert fullerene.info[
+               "charge"] % 2 == 0, f"Only Deal with Even number charged Fullerene Now. Got charge:{fullerene.info['charge']}."
+    csi_adj = fullerene.atomADJ  # not used actually
+
+    distances = fullerene.get_all_distances()
+    mask = np.ones_like(distances) - np.eye(fullerene.natoms)
+    # dis_vec = fullerene.get_all_distances(vector=True)
+    # dis_vec /= (distances + 0.00001)[:, :, None]
+    # orbital_p_vec = (distances[:, :, None] * dis_vec).sum(-2)
+    # orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
+
+    orbital_p_vec = np.zeros([fullerene.natoms, 3])
+    for i in range(fullerene.natoms):
+        O = sphere_center_of_four_points(
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][0],
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][1],
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][2],
+            fullerene.positions[i])
+        orbital_p_vec[i] = fullerene.positions[i] - O
+    orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
+    if distance_cutoff:
+        dis_mask_idx = np.where(distances > distance_cutoff)
+        distances[dis_mask_idx] = 0
+        mask[dis_mask_idx] = 0
+    orbital_p_cos = (orbital_p_vec[None, :] * orbital_p_vec[:, None]).sum(-1) / 2 + 0.5
+    mask = csi_adj * mask
+
+    extend_adj = orbital_p_cos*np.exp(-distances**2)
+
+    sum_chi = np.linalg.eigh(extend_adj * mask)
+
+    adj = fullerene.get_fullerenecage().circleADJ
+    Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:, None]).sum() / 2
+    # sum_chi = sum_chi[:fullerene.natoms // 2 - int(fullerene.info["charge"])//2]
+
+    return sum_chi[0], sum_chi[1], Napp
+
 
 if __name__ == '__main__':
     _ = \
@@ -79,12 +139,11 @@ if __name__ == '__main__':
 
     # =============== PART 1 ================ #
     """
-    DIS_CUT = None
-    calculate_ext_csi = partial(calculate_ext_csi, distance_cutoff=DIS_CUT)
+
     SPIRAL_ATOMS_ADJ_DIR = r"D:\CODE\#DATASETS\FullDB\atomadj"  # change this
     SPIRAL_CIRCLE_ADJ_DIR = r"D:\CODE\#DATASETS\FullDB\circleadj"  # change this
     XYZ_STORE_PREFIX = r"D:\CODE\#DATASETS\FullDB\xTBcal"  # change this
-    CSI_NPY_STORE_PREFIX = r"D:\CODE\#DATASETS\FullDB\c2addonwork\xCSI7" + str(DIS_CUT)  # change this
+    CSI_NPY_STORE_PREFIX = r"D:\CODE\#DATASETS\FullDB\c2addonwork\xCSI_dis_angle"  # change this
     if not pathlib.Path(XYZ_STORE_PREFIX).exists():
         pathlib.Path(XYZ_STORE_PREFIX).mkdir(parents=True)
     if not pathlib.Path(CSI_NPY_STORE_PREFIX).exists():
@@ -100,7 +159,7 @@ if __name__ == '__main__':
         6
     ]
 
-    CSI_NPY_FILE_SUFFIX = "xCSI" + str(DIS_CUT)
+    CSI_NPY_FILE_SUFFIX = "xCSI_dis_angle"
     _ = \
         """
     # =============== PART 2 ================ #
@@ -115,7 +174,7 @@ if __name__ == '__main__':
 
     include_traj = False  # set to `False` to only calculate the optimized isomers (most stable configurations)
 
-    number_mask = range(24, 72, 2)
+    number_mask = range(30, 72, 2)
     # Set to None if not need mask
     print("Calculating...")
     if not _pass:
@@ -142,7 +201,6 @@ if __name__ == '__main__':
                              _func=calculate_ext_csi,
                              include_traj=include_traj)
     print("Calculated.")
-    input()
     _ = \
         """
     # =============== PART 3 ================ #
@@ -151,7 +209,7 @@ if __name__ == '__main__':
 
     # =============== PART 2 ================ #
     """
-    draw_list = range(24, 72, 2)
+    draw_list = range(42, 44, 2)
     draw_rc = np.array(list((map(charges_draw_parse, charged_list))))
 
     napp_value_all = np.array([])
@@ -159,12 +217,14 @@ if __name__ == '__main__':
     enlist_all = np.array([])
     charge_all = np.array([])
     print("Drawing...")
+
     for N in draw_list:
         # fig, ax = plt.subplots(nrows=3, ncols=max(draw_rc[:, 1]) + 1)
         for charge in charged_list:
             charge_in_name = charge_name_parse(charge)
             pltidx = charges_draw_parse(charge_number=charge)
-            file = (pathlib.Path(CSI_NPY_STORE_PREFIX + charge_in_name) / f"C{N}_{CSI_NPY_FILE_SUFFIX}.npz").as_posix()
+            file = (pathlib.Path(
+                CSI_NPY_STORE_PREFIX + charge_in_name) / f"C{N}_{CSI_NPY_FILE_SUFFIX}.npz").as_posix()
             file = np.load(file)
             csi_value = file["csi_list"]
             energy_value = file["energy"]
@@ -177,14 +237,17 @@ if __name__ == '__main__':
             # ax[pltidx[0], pltidx[1]].scatter(xcsilist, enlist, marker="x")
             # ax[pltidx[0], pltidx[1]].set_xlabel("XCSI of {} isomers, cutoff={}".format(f"C$_{{{N}}}^{{{str(charge) + '+' if charge > 0 else '' if charge >= 0 else str(abs(charge)) + '-'}}}$", DIS_CUT))
             # ax[pltidx[0], pltidx[1]].set_ylabel("Relative energy of {} isomers".format(f"C$_{{{N}}}^{{{str(charge) + '+' if charge > 0 else '' if charge >= 0 else str(abs(charge)) + '-'}}}$", DIS_CUT))
-            # print(charge, np.corrcoef(np.array([xcsilist, napp_value, xcsilist_only_xcsi, enlist])))
+            print(charge, np.corrcoef(
+                np.array([xcsilist, napp_value, xcsilist_only_xcsi, enlist])))
             napp_value_all = np.hstack([napp_value_all, napp_value])
-            xcsilist_only_xcsi_all = np.hstack([xcsilist_only_xcsi_all, xcsilist_only_xcsi])
+            xcsilist_only_xcsi_all = np.hstack(
+                [xcsilist_only_xcsi_all, xcsilist_only_xcsi])
             enlist_all = np.hstack([enlist_all, enlist])
             charge_all = np.hstack([charge_all, np.ones_like(enlist) * charge])
 
         data = pd.DataFrame(data={
-            "napp_value": napp_value_all, "xcsilist_only_xcsi": xcsilist_only_xcsi_all, "enlist": enlist_all, "charge": charge_all
+            "napp_value": napp_value_all, "xcsilist_only_xcsi": xcsilist_only_xcsi_all,
+            "enlist": enlist_all, "charge": charge_all
         })
         g = sns.scatterplot(data=data, x="xcsilist_only_xcsi", y="enlist", hue="charge")
         g.set_xlabel("XCSI")
