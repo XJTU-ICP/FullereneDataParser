@@ -234,9 +234,9 @@ if __name__ == '__main__':
     # fig = plt.figure(figsize=[10, 10])
     # ax = fig.add_subplot(111)
 
-    # fullerxtb_pred=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_pred.npy")
-    # fullerxtb_ref=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_ref.npy")
-    # fullerxtb_diff=np.load(r"C:\Work\CODE\PythonPro\FullereneDataPraser\examples\fullerxtbData\FullXTB_dif.npy")
+    # fullerxtb_pred=np.load(r"C:\Work\CODE\PythonPro\FullereneDataParser\examples\fullerxtbData\FullXTB_pred.npy")
+    # fullerxtb_ref=np.load(r"C:\Work\CODE\PythonPro\FullereneDataParser\examples\fullerxtbData\FullXTB_ref.npy")
+    # fullerxtb_diff=np.load(r"C:\Work\CODE\PythonPro\FullereneDataParser\examples\fullerxtbData\FullXTB_dif.npy")
 
     # ax=fig.add_subplot(111)
     # print(len(csi))
