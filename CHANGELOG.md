@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.0](https://github.com/XJTU-ICP/FullereneDataParser/compare/v0.1.0...v0.2.0) (2022-09-29)
+
+
+### Features
+
+* **drawcage:** api for optional axes of matplotlib. ([8d78ed3](https://github.com/XJTU-ICP/FullereneDataParser/commit/8d78ed35e3bfc40b23688026e0082031c8ea27b1))
+* **xcsi:** add poav orbital calculation. ([010778c](https://github.com/XJTU-ICP/FullereneDataParser/commit/010778c3ee0a2424dbd089a82da8b3c1633ebf2b))
+* **xcsi:** calculation examples of csi with orbitals. ([eac3a3e](https://github.com/XJTU-ICP/FullereneDataParser/commit/eac3a3e692bf04482b1b8d93c4cdcdc41c0927ed))
+* **xcsiwork:** draw results of xcsi models with angle/distance/adjmask. And schnet, spookynet. ([76adf97](https://github.com/XJTU-ICP/FullereneDataParser/commit/76adf971c3aac6d8438efd445097c310c2796e33))
+
+
+### Bug Fixes
+
+* **adj2spiral:** fix bug for system size and file extension. ([4f1bab1](https://github.com/XJTU-ICP/FullereneDataParser/commit/4f1bab1522eaa5afecad1a596bfa5c16f2b97b3c))
+* **adj2spiral:** fix not read any comment from xyz file. ([b30e77d](https://github.com/XJTU-ICP/FullereneDataParser/commit/b30e77db409710cc2b2ecdfd692be4ec5f6c83a4))
+* **atomadj:** fix wrong found result by natural cutoffs with first 3 shortest distances. ([46138a7](https://github.com/XJTU-ICP/FullereneDataParser/commit/46138a7f16ec0ceeac56b70e5f5e1bcecaaed265))
+* **drawcage:** draw cage with a parallel edge. ([33b3dea](https://github.com/XJTU-ICP/FullereneDataParser/commit/33b3dea41a1e51736776b5a5d5c3f84b740f55e8))
+* **originalcsi:** fix napp calculation in origin csi. ([1138917](https://github.com/XJTU-ICP/FullereneDataParser/commit/1138917a3ab1666ae037b20e0b24483159ad9bcf))
+
 ## [0.1.0](https://github.com/XJTU-ICP/FullereneDataPraser/compare/v0.0.2...v0.1.0) (2022-05-05)
 
 
