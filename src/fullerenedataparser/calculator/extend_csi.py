@@ -33,7 +33,8 @@ setGlobValue("log_level", logging.DEBUG)
 logger = Logger(__name__, console_on=True)
 
 
-def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
+def calculate_ext_csi(fullerene: FullereneFamily, para=7,
+                      distance_cutoff=None):
     """
     Implemention of extended
     Parameters
@@ -53,7 +54,8 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
     """
 
     assert fullerene.natoms % 2 == 0, f"Not A classical Fullerene. Check your input atoms: {fullerene}."
-    assert fullerene.info["charge"] % 2 == 0, f"Only Deal with Even number charged Fullerene Now. Got charge:{fullerene.info['charge']}."
+    assert fullerene.info[
+               "charge"] % 2 == 0, f"Only Deal with Even number charged Fullerene Now. Got charge:{fullerene.info['charge']}."
     # csi_adj = fullerene.atomADJ # not used actually
 
     distances = fullerene.get_all_distances()
@@ -63,19 +65,21 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
     # orbital_p_vec = (distances[:, :, None] * dis_vec).sum(-2)
     # orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
 
-    orbital_p_vec = np.zeros([fullerene.natoms,3])
+    orbital_p_vec = np.zeros([fullerene.natoms, 3])
     for i in range(fullerene.natoms):
-        O = sphere_center_of_four_points(fullerene.positions[np.where(fullerene.atomADJ[i]==1)][0],
-                                         fullerene.positions[np.where(fullerene.atomADJ[i]==1)][1],
-                                         fullerene.positions[np.where(fullerene.atomADJ[i]==1)][2],
-                                         fullerene.positions[i])
-        orbital_p_vec[i]=fullerene.positions[i]-O
+        O = sphere_center_of_four_points(
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][0],
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][1],
+            fullerene.positions[np.where(fullerene.atomADJ[i] == 1)][2],
+            fullerene.positions[i])
+        orbital_p_vec[i] = fullerene.positions[i] - O
     orbital_p_vec /= -np.linalg.norm(orbital_p_vec, 2, 1)[:, None]
     if distance_cutoff:
-        dis_mask_idx = np.where(distances>distance_cutoff)
-        distances[dis_mask_idx]=0
-        mask[dis_mask_idx]=0
-    orbital_p_cos = (orbital_p_vec[None, :] * orbital_p_vec[:, None]).sum(-1) / 2 + 0.5
+        dis_mask_idx = np.where(distances > distance_cutoff)
+        distances[dis_mask_idx] = 0
+        mask[dis_mask_idx] = 0
+    orbital_p_cos = (orbital_p_vec[None, :] * orbital_p_vec[:, None]).sum(
+        -1) / 2 + 0.5
 
     t = para
 
@@ -84,13 +88,15 @@ def calculate_ext_csi(fullerene: FullereneFamily, para=7, distance_cutoff=None):
     sum_chi = np.linalg.eigh(t * extend_adj * mask)
 
     adj = fullerene.get_fullerenecage().circleADJ
-    Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:, None]).sum() / 2
+    Napp = (adj * (adj.sum(-1) == 5)[None, :] * (adj.sum(-1) == 5)[:,
+                                                None]).sum() / 2
     # sum_chi = sum_chi[:fullerene.natoms // 2 - int(fullerene.info["charge"])//2]
 
     return sum_chi[0], sum_chi[1], Napp
 
 
-def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_ext_csi, charge=0, all_xyz=False):
+def store_csi(atomfile, circlefile, xyz_dir, target_path, para,
+              _func=calculate_ext_csi, charge=0, all_xyz=False):
     """
         save file to `target_path`,{
     csi_list,spiral_num,energy
@@ -124,33 +130,42 @@ def store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=calculate_
     pa = re.compile("[0-9]+")
     pbar = tqdm(total=len(os.listdir(xyz_dir)))
     adjgener = adj_gener(atomfile, circlefile)
-    for xyz_path in recursion_files(rootpath=xyz_dir, ignore_mode=True, format="xyz"):
+    for xyz_path in recursion_files(rootpath=xyz_dir, ignore_mode=True,
+                                    format="xyz"):
         adj = next(adjgener)
         pbar.set_description(f'{xyz_path}')
         pbar.update()
-        for f in list(simple_read_xyz_xtb(xyz_path))[-1] if not all_xyz else list(simple_read_xyz_xtb(xyz_path)):
+        for f in list(simple_read_xyz_xtb(xyz_path))[
+                 -1:] if not all_xyz else list(simple_read_xyz_xtb(xyz_path)):
             spiral_num = int(pa.findall(os.path.splitext(xyz_path)[0])[-1])
             assert spiral_num == adj["spiral_num"]
             atomadj = adj["atomadj"]
             circleadj = adj["circleadj"]
             energy = f.info["energy"]
             f.info["charge"] = charge
-            fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj, circleADJ=circleadj, atoms=f)
+            fuller = FullereneFamily(spiral=spiral_num, atomADJ=atomadj,
+                                     circleADJ=circleadj, atoms=f)
             spiral_num_list.append(spiral_num)
             csi_val, _, napp_val = _func(fuller, para=para)
             csi_list.append(csi_val)
             napp_list.append(napp_val)
             energy_list.append(energy)
-    np.savez(target_path, csi_list=csi_list, spiral_num=np.array(spiral_num_list), energy=np.array(energy_list), napp=napp_list)
+    np.savez(target_path, csi_list=csi_list,
+             spiral_num=np.array(spiral_num_list),
+             energy=np.array(energy_list), napp=napp_list)
 
 
 def _store_csi(args):
     logger.debug(f"_store_csi:{args}")
     atomfile, circlefile, xyz_dir, target_path, para, _func, charge, include_traj = args
-    store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=_func, charge=charge, all_xyz=include_traj)
+    store_csi(atomfile, circlefile, xyz_dir, target_path, para, _func=_func,
+              charge=charge, all_xyz=include_traj)
 
 
-def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0, recalculate=True, npz_file_suffix="xCSI", number_mask=None, _func=calculate_ext_csi, include_traj=False):
+def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7,
+                 charge=0, recalculate=True, npz_file_suffix="xCSI",
+                 number_mask=None, _func=calculate_ext_csi,
+                 include_traj=False):
     """
     Batch process of calculating extended-CSI
 
@@ -178,12 +193,14 @@ def mp_store_csi(atomdir, circledir, xyz_root_dir, target_dir, para=7, charge=0,
         if not os.path.exists(target_dir):
             os.mkdir(target_dir)
         try:
-            target_path = os.path.join(target_dir, basename + f"_{npz_file_suffix}.npz")
+            target_path = os.path.join(target_dir,
+                                       basename + f"_{npz_file_suffix}.npz")
             args = atomfile, circlefile, xyz_dir, target_path, para, _func, charge, include_traj
             if not recalculate:
                 if pathlib.Path(target_path).exists():
                     continue
-            po.apply_async(func=_store_csi, args=(args,), error_callback=print_error)
+            po.apply_async(func=_store_csi, args=(args,),
+                           error_callback=print_error)
         except FileNotFoundError:
             continue
     po.close()
@@ -210,16 +227,19 @@ if __name__ == '__main__':
             elif charge < 0:
                 charge_suffix = "_n" + str(abs(charge))
 
-            xyz_dir = r"C:\Work\CODE\DATA\fullerxTBcal\xTBcal" + charge_suffix + "\C" + str(num)
+            xyz_dir = r"C:\Work\CODE\DATA\fullerxTBcal\xTBcal" + charge_suffix + "\C" + str(
+                num)
 
 
             def target_path(num):
-                return r"C:\Work\CODE\DATA\xCSI7\C" + str(num) + charge_suffix + "_xCSI.npz"
+                return r"C:\Work\CODE\DATA\xCSI7\C" + str(
+                    num) + charge_suffix + "_xCSI.npz"
 
 
             # set ratio of distance part
             if not skip:
-                args = atomfile, circlefile, xyz_dir, target_path(num), para, charge
+                args = atomfile, circlefile, xyz_dir, target_path(
+                    num), para, charge
                 _store_csi(args)
     # csi = []
     # en = []

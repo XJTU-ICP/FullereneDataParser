@@ -101,7 +101,12 @@ class FullereneFamily(Atoms):
 
     @lazy_property
     def calculated_circleADJ(self):
-        raise NotImplementedError
+        edge_list = self.circle_finder.get_dual_edge_list()
+        circleADJ = np.zeros([self.circle_finder.face_size,self.circle_finder.face_size])
+        for item in edge_list:
+            circleADJ[item[0],item[1]]=1
+            circleADJ[item[1], item[0]] = 1
+        return circleADJ
 
     @lazy_property
     def graph(self) -> nx.Graph:

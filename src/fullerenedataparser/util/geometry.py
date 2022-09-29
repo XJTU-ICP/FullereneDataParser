@@ -9,7 +9,9 @@
 import numpy as np
 
 
-def sphere_center_of_four_points(point_a: np.ndarray, point_b: np.ndarray, point_c: np.ndarray, point_d: np.ndarray) -> np.ndarray:
+def sphere_center_of_four_points(point_a: np.ndarray, point_b: np.ndarray,
+                                 point_c: np.ndarray,
+                                 point_d: np.ndarray) -> np.ndarray:
     """
     Calculate the center of sphere for four non-coplanar points
 
@@ -48,6 +50,7 @@ def sphere_center_of_four_points(point_a: np.ndarray, point_b: np.ndarray, point
     pos_tensor = pos_list - pos_list[:, None, :]
     dis_matrix = np.linalg.norm(pos_tensor, axis=-1)
     center_matrix = pos_tensor.sum(axis=-2)
-    B = (pos_list * center_matrix).sum(axis=-1) + ((dis_matrix ** 2).sum(axis=-1)) / 2
+    B = (pos_list * center_matrix).sum(axis=-1) + (
+        (dis_matrix ** 2).sum(axis=-1)) / 2
     O = np.linalg.inv(center_matrix[:3]) @ B[:3]
     return O

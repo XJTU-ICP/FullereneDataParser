@@ -22,8 +22,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from fullerenedatapraser.calculator.extend_csi import mp_store_csi
-from fullerenedatapraser.molecular.fullerene import FullereneFamily
+from fullerenedataparser.calculator.extend_csi import mp_store_csi
+from fullerenedataparser.molecular.fullerene import FullereneFamily
 from utils import charge_name_parse, charges_draw_parse, calculate_xcsi
 
 plt.rcParams['font.sans-serif'] = "Arial"

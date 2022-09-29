@@ -9,11 +9,7 @@ import pathlib
 
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
-import skunk
 from matplotlib.ticker import MaxNLocator
-from tqdm import tqdm
-
-from src.fullerenedatapraser.molecular.fullerene import FullereneCage
 
 rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
@@ -22,9 +18,7 @@ rcParams['font.sans-serif'] = ['Arial']
 import numpy as np
 from ase.units import mol, kcal, eV, Hartree
 
-from examples.xcsi.utils import charges_draw_parse, charge_name_parse, \
-    calculate_origin_csi_only_napp, calculate_origin_csi, \
-    calculate_origin_csi_without_napp, calculate_xcsi
+from examples.xcsi.utils import charges_draw_parse, charge_name_parse
 
 charged_list = [
     0,
